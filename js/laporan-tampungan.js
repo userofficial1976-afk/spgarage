@@ -1,379 +1,777 @@
-alert("laporan-tampungan.js berjaya load");
+// =====================================================
+// LAPORAN POS TAMPUNGAN
+// FPB DUTY SYSTEM
+// SOURCE: rk02_pos_tampungan
+// =====================================================
 
-/* ==========================================
-   ISI DROPDOWN BULAN & TAHUN
-========================================== */
+console.log("==============================================");
+console.log("📋 LAPORAN POS TAMPUNGAN JS READY");
+console.log("==============================================");
 
-function isiBulanTahun(){
 
-    const bulanDropdown =
-    document.getElementById(
-        "filterBulan"
-    );
+// =====================================================
+// GLOBAL
+// =====================================================
 
-    const tahunDropdown =
-    document.getElementById(
-        "filterTahun"
-    );
+let dataTampungan = [];
+let laporanTampungan = [];
 
-    if(!bulanDropdown || !tahunDropdown){
-        console.log(
-            "Dropdown Bulan/Tahun tidak dijumpai"
-        );
-        return;
+let bulanSemasa = null;
+let tahunSemasa = null;
+
+
+// =====================================================
+// SENARAI BULAN
+// =====================================================
+
+const SENARAI_BULAN = [
+    "",
+    "JANUARI",
+    "FEBRUARI",
+    "MAC",
+    "APRIL",
+    "MEI",
+    "JUN",
+    "JULAI",
+    "OGOS",
+    "SEPTEMBER",
+    "OKTOBER",
+    "NOVEMBER",
+    "DISEMBER"
+];
+
+
+// =====================================================
+// INIT
+// =====================================================
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+    console.log("📋 LAPORAN TAMPUNGAN: INIT");
+
+    await tungguSupabase();
+
+    isiBulan();
+    isiTahun();
+
+    // Default bulan / tahun semasa
+    const sekarang = new Date();
+
+    bulanSemasa = sekarang.getMonth() + 1;
+    tahunSemasa = sekarang.getFullYear();
+
+    const bulanSelect = document.getElementById("filterBulan");
+    const tahunSelect = document.getElementById("filterTahun");
+
+    if (bulanSelect) {
+        bulanSelect.value = String(bulanSemasa);
     }
 
-    const senaraiBulan = [
+    if (tahunSelect) {
+        tahunSelect.value = String(tahunSemasa);
+    }
 
-        "Januari",
-        "Februari",
-        "Mac",
-        "April",
-        "Mei",
-        "Jun",
-        "Julai",
-        "Ogos",
-        "September",
-        "Oktober",
-        "November",
-        "Disember"
+});
 
-    ];
 
-    senaraiBulan.forEach(bulan => {
+// =====================================================
+// TUNGGU SUPABASE
+// =====================================================
 
-        bulanDropdown.innerHTML += `
+async function tungguSupabase() {
 
-            <option value="${bulan}">
-                ${bulan}
-            </option>
+    let percubaan = 0;
 
+    while (!window.supabaseClient && percubaan < 50) {
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        percubaan++;
+
+    }
+
+    if (!window.supabaseClient) {
+
+        console.error("❌ SUPABASE CLIENT TIDAK DIJUMPA");
+
+        alert("Supabase belum siap.");
+
+        return false;
+
+    }
+
+    console.log("✅ SUPABASE CLIENT READY");
+
+    return true;
+
+}
+
+
+// =====================================================
+// ISI BULAN
+// =====================================================
+
+function isiBulan() {
+
+    const select = document.getElementById("filterBulan");
+
+    if (!select) return;
+
+    select.innerHTML = `
+        <option value="">
+            -- Pilih Bulan --
+        </option>
+    `;
+
+    for (let i = 1; i <= 12; i++) {
+
+        const option = document.createElement("option");
+
+        option.value = i;
+
+        option.textContent = SENARAI_BULAN[i];
+
+        select.appendChild(option);
+
+    }
+
+}
+
+
+// =====================================================
+// ISI TAHUN
+// =====================================================
+
+function isiTahun() {
+
+    const select = document.getElementById("filterTahun");
+
+    if (!select) return;
+
+    select.innerHTML = `
+        <option value="">
+            -- Pilih Tahun --
+        </option>
+    `;
+
+    const tahunSekarang = new Date().getFullYear();
+
+    for (
+        let tahun = tahunSekarang - 3;
+        tahun <= tahunSekarang + 2;
+        tahun++
+    ) {
+
+        const option = document.createElement("option");
+
+        option.value = tahun;
+
+        option.textContent = tahun;
+
+        select.appendChild(option);
+
+    }
+
+}
+
+
+// =====================================================
+// PAPAR LAPORAN
+// =====================================================
+
+async function paparLaporanTampungan() {
+
+    const bulan = Number(
+        document.getElementById("filterBulan")?.value
+    );
+
+    const tahun = Number(
+        document.getElementById("filterTahun")?.value
+    );
+
+
+    if (!bulan || !tahun) {
+
+        alert("Sila pilih Bulan dan Tahun.");
+
+        return;
+
+    }
+
+
+    console.log("----------------------------------------------");
+    console.log("🔍 CARI DATA TAMPUNGAN");
+    console.log("Bulan:", bulan);
+    console.log("Tahun:", tahun);
+    console.log("----------------------------------------------");
+
+
+    const db = window.supabaseClient;
+
+    if (!db) {
+
+        alert("Supabase belum disambungkan.");
+
+        return;
+
+    }
+
+
+    const tbody =
+        document.getElementById("senaraiTampungan");
+
+    if (tbody) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align:center;">
+                    ⏳ Memuatkan data...
+                </td>
+            </tr>
         `;
+
+    }
+
+
+    try {
+
+        const { data, error } = await db
+            .from("rk02_pos_tampungan")
+            .select("*")
+            .eq("bulan", bulan)
+            .eq("tahun", tahun)
+            .order("poskhidmat", {
+                ascending: true
+            })
+            .order("nama", {
+                ascending: true
+            });
+
+
+        if (error) {
+
+            console.error(
+                "❌ RALAT SUPABASE:",
+                error
+            );
+
+            throw error;
+
+        }
+
+
+        dataTampungan = data || [];
+
+
+        console.log(
+            "✅ DATA TAMPUNGAN:",
+            dataTampungan.length
+        );
+
+
+        binaLaporanTampungan();
+
+
+        paparJadual();
+
+
+    } catch (error) {
+
+        console.error(
+            "❌ GAGAL MUAT DATA TAMPUNGAN:",
+            error
+        );
+
+
+        if (tbody) {
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8"
+                        style="text-align:center;color:#b94b4b;">
+                        ❌ Gagal memuatkan data.
+                    </td>
+                </tr>
+            `;
+
+        }
+
+        alert(
+            "Gagal memuatkan laporan tampungan.\n\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// BINA LAPORAN
+// =====================================================
+
+function binaLaporanTampungan() {
+
+    laporanTampungan = [];
+
+
+    dataTampungan.forEach(row => {
+
+        // ---------------------------------------------
+        // POS 1
+        // ---------------------------------------------
+
+        tambahPosJikaAda(
+            row,
+            1
+        );
+
+
+        // ---------------------------------------------
+        // POS 2
+        // ---------------------------------------------
+
+        tambahPosJikaAda(
+            row,
+            2
+        );
+
+
+        // ---------------------------------------------
+        // POS 3
+        // ---------------------------------------------
+
+        tambahPosJikaAda(
+            row,
+            3
+        );
+
+
+        // ---------------------------------------------
+        // POS 4
+        // ---------------------------------------------
+
+        tambahPosJikaAda(
+            row,
+            4
+        );
+
+
+        // ---------------------------------------------
+        // POS 5
+        // ---------------------------------------------
+
+        tambahPosJikaAda(
+            row,
+            5
+        );
+
+
+        // ---------------------------------------------
+        // POS 6
+        // ---------------------------------------------
+
+        tambahPosJikaAda(
+            row,
+            6
+        );
 
     });
 
-    const tahunSemasa =
-    new Date().getFullYear();
-
-    for(
-        let tahun=tahunSemasa-2;
-        tahun<=tahunSemasa+2;
-        tahun++
-    ){
-
-        tahunDropdown.innerHTML += `
-
-            <option value="${tahun}">
-                ${tahun}
-            </option>
-
-        `;
-
-    }
 
     console.log(
-        "Dropdown berjaya diisi"
+        "📊 BARIS LAPORAN:",
+        laporanTampungan.length
     );
 
 }
 
 
-/* ==========================================
-   PAPAR LAPORAN POS TAMPUNGAN
-========================================== */
+// =====================================================
+// TAMBAH POS
+// =====================================================
 
-async function paparLaporanTampungan(){
+function tambahPosJikaAda(row, nomborPos) {
 
-    const bulan =
-    document.getElementById(
-        "filterBulan"
-    ).value;
+    const namaColumn =
+        `pos${nomborPos}`;
 
-    const tahun =
-    document.getElementById(
-        "filterTahun"
-    ).value;
+    const jamColumn =
+        `jam_pos${nomborPos}`;
 
-    if(!bulan || !tahun){
+    const rmColumn =
+        `rm_pos${nomborPos}`;
 
-        document.getElementById(
-            "senaraiTampungan"
-        ).innerHTML = `
 
-            <tr>
-                <td colspan="8">
-                    Sila pilih Bulan dan Tahun
-                </td>
-            </tr>
+    const namaPos =
+        row[namaColumn];
 
-        `;
 
-        return;
-    }
+    const jam =
+        Number(row[jamColumn]) || 0;
 
-    console.log(
-        "Filter:",
-        bulan,
-        tahun
-    );
 
-    const {
-        data,
-        error
-    } = await supabaseClient
+    const rm =
+        Number(row[rmColumn]) || 0;
 
-        .from("jadual_duty")
 
-        .select(`
-            pos_tampungan,
-            no_skb,
-            nama_anggota,
-            nama_pos_asal,
-            jam_tampungan,
-            rm_klm_tampungan
-        `)
-
-        .eq("bulan", bulan)
-
-        .eq("tahun", tahun)
-
-        .not(
-            "pos_tampungan",
-            "is",
-            null
-        )
-
-        .neq(
-            "pos_tampungan",
-            ""
-        )
-
-        .order(
-            "pos_tampungan",
-            {
-                ascending:true
-            }
-        );
-
-    if(error){
-
-        console.error(error);
-
-        document.getElementById(
-            "senaraiTampungan"
-        ).innerHTML = `
-
-            <tr>
-                <td colspan="8">
-                    ${error.message}
-                </td>
-            </tr>
-
-        `;
+    // Jangan masukkan kalau tiada jam
+    if (jam <= 0) {
 
         return;
+
     }
 
-    if(!data || data.length===0){
 
-        document.getElementById(
-            "senaraiTampungan"
-        ).innerHTML = `
-
-            <tr>
-                <td colspan="8">
-                    Tiada Rekod Pos Tampungan
-                </td>
-            </tr>
-
-        `;
-
-        document.getElementById(
-            "jumlahJam"
-        ).textContent = "0";
-
-        document.getElementById(
-            "jumlahRm"
-        ).textContent = "RM 0.00";
+    // Nama pos wajib ada
+    if (!namaPos || !String(namaPos).trim()) {
 
         return;
-    }
-
-    const noSkbList = [
-
-        ...new Set(
-
-            data
-            .map(x => x.no_skb)
-            .filter(Boolean)
-
-        )
-
-    ];
-
-    const {
-        data: anggotaData,
-        error: anggotaError
-    } = await supabaseClient
-
-        .from("Data_Anggota")
-
-        .select(`
-            no_skb,
-            gaji_pokok
-        `)
-
-        .in(
-            "no_skb",
-            noSkbList
-        );
-
-    if(anggotaError){
-
-        console.error(
-            anggotaError
-        );
 
     }
 
-    const anggotaMap =
-    new Map();
 
-    (anggotaData || [])
-    .forEach(a => {
+    laporanTampungan.push({
 
-        anggotaMap.set(
-            String(a.no_skb),
-            a.gaji_pokok
-        );
+        id: row.id,
+
+        bulan: row.bulan,
+
+        tahun: row.tahun,
+
+        posTampungan:
+            String(namaPos).trim(),
+
+        no_skb:
+            row.no_skb || "",
+
+        nama:
+            row.nama || "",
+
+        poskhidmat:
+            row.poskhidmat || "",
+
+        jam:
+            jam,
+
+        rm:
+            rm,
+
+        nomborPos:
+            nomborPos
 
     });
 
-    let html = "";
+}
 
-    let bil = 1;
+
+// =====================================================
+// PAPAR JADUAL
+// =====================================================
+
+function paparJadual() {
+
+    const tbody =
+        document.getElementById(
+            "senaraiTampungan"
+        );
+
+
+    if (!tbody) {
+
+        console.error(
+            "❌ #senaraiTampungan tidak dijumpai"
+        );
+
+        return;
+
+    }
+
+
+    tbody.innerHTML = "";
+
+
+    if (!laporanTampungan.length) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8"
+                    style="text-align:center;padding:25px;">
+                    Tiada rekod tampungan bagi bulan dan tahun dipilih.
+                </td>
+            </tr>
+        `;
+
+
+        kemasKiniJumlah();
+
+        return;
+
+    }
+
+
+    laporanTampungan.forEach(
+        (row, index) => {
+
+            const tr =
+                document.createElement("tr");
+
+
+            tr.innerHTML = `
+
+                <td>
+                    ${index + 1}
+                </td>
+
+                <td>
+                    <strong>
+                        ${escapeHtml(
+                            row.posTampungan
+                        )}
+                    </strong>
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        row.no_skb
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        row.nama
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        row.poskhidmat
+                    )}
+                </td>
+
+                <td>
+                    ${formatRM(
+                        dapatkanBasicGaji(
+                            row.no_skb
+                        )
+                    )}
+                </td>
+
+                <td>
+                    ${formatJam(
+                        row.jam
+                    )}
+                </td>
+
+                <td>
+                    <strong>
+                        ${formatRM(
+                            row.rm
+                        )}
+                    </strong>
+                </td>
+
+            `;
+
+
+            tbody.appendChild(tr);
+
+        }
+    );
+
+
+    kemasKiniJumlah();
+
+}
+
+
+// =====================================================
+// BASIC GAJI
+// =====================================================
+//
+// rk02_pos_tampungan TIDAK ADA column gaji_pokok.
+// Buat sementara kita cuba baca daripada cache
+// jika page lain pernah simpan Data_Anggota.
+//
+// Kalau tiada, papar RM 0.00.
+// =====================================================
+
+function dapatkanBasicGaji(noSKB) {
+
+    // Cuba cache global
+    if (
+        window.dataAnggota &&
+        Array.isArray(window.dataAnggota)
+    ) {
+
+        const anggota =
+            window.dataAnggota.find(
+                x =>
+                    String(x.no_skb) ===
+                    String(noSKB)
+            );
+
+
+        if (anggota) {
+
+            return Number(
+                anggota.gaji_pokok
+            ) || 0;
+
+        }
+
+    }
+
+
+    return 0;
+
+}
+
+
+// =====================================================
+// JUMLAH
+// =====================================================
+
+function kemasKiniJumlah() {
 
     let jumlahJam = 0;
 
-    let jumlahRm = 0;
+    let jumlahRM = 0;
 
-    data.forEach(row => {
 
-        const gaji =
+    laporanTampungan.forEach(row => {
 
-        anggotaMap.get(
-            String(row.no_skb)
-        ) ?? 0;
+        jumlahJam +=
+            Number(row.jam) || 0;
 
-        jumlahJam += Number(
-            row.jam_tampungan || 0
-        );
-
-        jumlahRm += Number(
-            row.rm_klm_tampungan || 0
-        );
-
-        html += `
-
-            <tr>
-
-                <td>${bil++}</td>
-
-                <td>
-                    ${row.pos_tampungan ?? "-"}
-                </td>
-
-                <td>
-                    ${row.no_skb ?? "-"}
-                </td>
-
-                <td>
-                    ${row.nama_anggota ?? "-"}
-                </td>
-
-                <td>
-                    ${row.nama_pos_asal ?? "-"}
-                </td>
-
-                <td>
-                    RM ${Number(gaji)
-                        .toFixed(2)}
-                </td>
-
-                <td>
-                    ${row.jam_tampungan ?? 0}
-                </td>
-
-                <td>
-                    RM ${Number(
-                        row.rm_klm_tampungan ?? 0
-                    ).toFixed(2)}
-                </td>
-
-            </tr>
-
-        `;
+        jumlahRM +=
+            Number(row.rm) || 0;
 
     });
 
-    document.getElementById(
-        "senaraiTampungan"
-    ).innerHTML = html;
 
-    document.getElementById(
-        "jumlahJam"
-    ).textContent =
-    jumlahJam;
+    const elJam =
+        document.getElementById(
+            "jumlahJam"
+        );
 
-    document.getElementById(
-        "jumlahRm"
-    ).textContent =
-    "RM " +
-    jumlahRm.toFixed(2);
+
+    const elRM =
+        document.getElementById(
+            "jumlahRm"
+        );
+
+
+    if (elJam) {
+
+        elJam.textContent =
+            formatJam(jumlahJam);
+
+    }
+
+
+    if (elRM) {
+
+        elRM.textContent =
+            formatRM(jumlahRM);
+
+    }
+
+
+    console.log(
+        "TOTAL JAM:",
+        jumlahJam
+    );
+
+
+    console.log(
+        "TOTAL RM:",
+        jumlahRM
+    );
 
 }
 
 
-/* ==========================================
-   PAGE LOAD
-========================================== */
+// =====================================================
+// FORMAT JAM
+// =====================================================
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
+function formatJam(value) {
 
-        console.log(
-            "DOMContentLoaded OK"
+    const number =
+        Number(value) || 0;
+
+
+    return number
+        .toLocaleString(
+            "ms-MY",
+            {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
         );
 
-        isiBulanTahun();
+}
+
+
+// =====================================================
+// FORMAT RM
+// =====================================================
+
+function formatRM(value) {
+
+    const number =
+        Number(value) || 0;
+
+
+    return "RM " +
+        number.toLocaleString(
+            "ms-MY",
+            {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        );
+
+}
+
+
+// =====================================================
+// ESCAPE HTML
+// =====================================================
+
+function escapeHtml(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
 
     }
-);
-/* ==========================================
-   MUAT TURUN CSV
-========================================== */
-
-function muatTurunCSV(){
-
-    const bulan =
-
-    document.getElementById(
-        "filterBulan"
-    ).value;
 
 
-    const tahun =
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
-    document.getElementById(
-        "filterTahun"
-    ).value;
+}
 
 
-    if(!bulan || !tahun){
+// =====================================================
+// CETAK / PDF
+// =====================================================
+
+function cetakLaporanPDF() {
+
+    if (!laporanTampungan.length) {
 
         alert(
-            "Sila pilih Bulan dan Tahun dahulu."
+            "Sila papar laporan terlebih dahulu."
         );
 
         return;
@@ -381,17 +779,14 @@ function muatTurunCSV(){
     }
 
 
-    const table =
-
-    document.querySelector(
-        ".table-wrapper table"
-    );
+    const jsPDF =
+        window.jspdf?.jsPDF;
 
 
-    if(!table){
+    if (!jsPDF) {
 
         alert(
-            "Jadual laporan tidak dijumpai."
+            "Library PDF belum dimuatkan."
         );
 
         return;
@@ -399,157 +794,235 @@ function muatTurunCSV(){
     }
 
 
-    const rows =
-
-    table.querySelectorAll(
-        "tr"
-    );
-
-
-    let csv = "";
-
-
-    rows.forEach(row => {
-
-
-        const cells =
-
-        row.querySelectorAll(
-            "th, td"
-        );
-
-
-        const rowData = [];
-
-
-        cells.forEach(cell => {
-
-
-            let text =
-
-            cell.innerText
-
-            .replace(
-                /\n/g,
-                " "
-            )
-
-            .replace(
-                /"/g,
-                '""'
-            )
-
-            .trim();
-
-
-            rowData.push(
-
-                `"${text}"`
-
-            );
-
+    const doc =
+        new jsPDF({
+            orientation: "landscape",
+            unit: "mm",
+            format: "a3"
         });
 
 
-        if(rowData.length > 0){
+    const bulan =
+        document.getElementById(
+            "filterBulan"
+        )?.value;
 
-            csv +=
 
-            rowData.join(",")
+    const tahun =
+        document.getElementById(
+            "filterTahun"
+        )?.value;
 
-            + "\n";
+
+    const namaBulan =
+        SENARAI_BULAN[
+            Number(bulan)
+        ] || "";
+
+
+    // ---------------------------------------------
+    // HEADER
+    // ---------------------------------------------
+
+    doc.setFontSize(18);
+
+    doc.text(
+        "LAPORAN POS TAMPUNGAN",
+        20,
+        18
+    );
+
+
+    doc.setFontSize(11);
+
+    doc.text(
+        `WILAYAH TERENGGANU | ${namaBulan} ${tahun}`,
+        20,
+        26
+    );
+
+
+    // ---------------------------------------------
+    // TABLE
+    // ---------------------------------------------
+
+    const body =
+        laporanTampungan.map(
+            (row, index) => [
+
+                index + 1,
+
+                row.posTampungan,
+
+                row.no_skb,
+
+                row.nama,
+
+                row.poskhidmat,
+
+                formatRM(
+                    dapatkanBasicGaji(
+                        row.no_skb
+                    )
+                ),
+
+                formatJam(
+                    row.jam
+                ),
+
+                formatRM(
+                    row.rm
+                )
+
+            ]
+        );
+
+
+    const jumlahJam =
+        laporanTampungan.reduce(
+            (sum, row) =>
+                sum + (
+                    Number(row.jam) || 0
+                ),
+            0
+        );
+
+
+    const jumlahRM =
+        laporanTampungan.reduce(
+            (sum, row) =>
+                sum + (
+                    Number(row.rm) || 0
+                ),
+            0
+        );
+
+
+    body.push([
+
+        "",
+
+        "",
+
+        "",
+
+        "",
+
+        "JUMLAH",
+
+        "",
+
+        formatJam(jumlahJam),
+
+        formatRM(jumlahRM)
+
+    ]);
+
+
+    doc.autoTable({
+
+        startY: 33,
+
+        head: [[
+
+            "Bil",
+
+            "Pos Tampungan",
+
+            "No SKB",
+
+            "Nama Anggota",
+
+            "Pos Asal",
+
+            "Basic Gaji",
+
+            "Jumlah Jam Tampung",
+
+            "Jumlah KLM (RM)"
+
+        ]],
+
+        body: body,
+
+        theme: "grid",
+
+        styles: {
+
+            fontSize: 8,
+
+            cellPadding: 3
+
+        },
+
+        headStyles: {
+
+            fontStyle: "bold",
+
+            halign: "center"
+
+        },
+
+        columnStyles: {
+
+            0: {
+                halign: "center",
+                cellWidth: 12
+            },
+
+            1: {
+                cellWidth: 60
+            },
+
+            2: {
+                cellWidth: 25
+            },
+
+            3: {
+                cellWidth: 55
+            },
+
+            4: {
+                cellWidth: 60
+            },
+
+            5: {
+                halign: "right",
+                cellWidth: 28
+            },
+
+            6: {
+                halign: "right",
+                cellWidth: 28
+            },
+
+            7: {
+                halign: "right",
+                cellWidth: 32
+            }
 
         }
 
     });
 
 
-    const blob =
-
-    new Blob(
-
-        [
-
-            "\uFEFF" + csv
-
-        ],
-
-        {
-
-            type:
-
-            "text/csv;charset=utf-8;"
-
-        }
-
-    );
-
-
-    const url =
-
-    URL.createObjectURL(
-        blob
-    );
-
-
-    const link =
-
-    document.createElement(
-        "a"
-    );
-
-
-    link.href = url;
-
-
-    link.download =
-
-    `Laporan_Pos_Tampungan_${bulan}_${tahun}.csv`;
-
-
-    document.body.appendChild(
-        link
-    );
-
-
-    link.click();
-
-
-    document.body.removeChild(
-        link
-    );
-
-
-    URL.revokeObjectURL(
-        url
+    doc.save(
+        `Laporan_Tampungan_${bulan}_${tahun}.pdf`
     );
 
 }
 
-/* ==========================================
-   CETAK / MUAT TURUN PDF
-========================================== */
 
-function cetakLaporanPDF(){
+// =====================================================
+// CSV
+// =====================================================
 
-    const bulan =
+function muatTurunCSV() {
 
-    document.getElementById(
-        "filterBulan"
-    ).value;
-
-
-    const tahun =
-
-    document.getElementById(
-        "filterTahun"
-    ).value;
-
-
-    if(!bulan || !tahun){
+    if (!laporanTampungan.length) {
 
         alert(
-            "Sila pilih Bulan dan Tahun dahulu."
+            "Sila papar laporan terlebih dahulu."
         );
 
         return;
@@ -557,165 +1030,198 @@ function cetakLaporanPDF(){
     }
 
 
-    const {
-
-        jsPDF
-
-    } = window.jspdf;
-
-
-    const pdf =
-
-    new jsPDF({
-
-        orientation:
-        "landscape",
-
-        unit:
-        "mm",
-
-        format:
-        "a4"
-
-    });
-   if(typeof pdf.autoTable !== "function"){
-
-    alert(
-        "Plugin PDF Table tidak berjaya load"
-    );
-
-    return;
-
-}
-
-    pdf.setFontSize(
-        16
-    );
+    const bulan =
+        document.getElementById(
+            "filterBulan"
+        )?.value || "";
 
 
-    pdf.text(
-
-        "LAPORAN POS TAMPUNGAN",
-
-        148,
-
-        15,
-
-        {
-
-            align:
-            "center"
-
-        }
-
-    );
+    const tahun =
+        document.getElementById(
+            "filterTahun"
+        )?.value || "";
 
 
-    pdf.setFontSize(
-        10
-    );
+    const rows = [];
 
 
-    pdf.text(
+    rows.push([
 
-        `Bulan: ${bulan} ${tahun}`,
+        "Bil",
 
-        148,
+        "Pos Tampungan",
 
-        22,
+        "No SKB",
 
-        {
+        "Nama Anggota",
 
-            align:
-            "center"
+        "Pos Asal",
+
+        "Basic Gaji",
+
+        "Jumlah Jam Tampung",
+
+        "Jumlah KLM (RM)"
+
+    ]);
+
+
+    laporanTampungan.forEach(
+        (row, index) => {
+
+            rows.push([
+
+                index + 1,
+
+                row.posTampungan,
+
+                row.no_skb,
+
+                row.nama,
+
+                row.poskhidmat,
+
+                dapatkanBasicGaji(
+                    row.no_skb
+                ).toFixed(2),
+
+                Number(
+                    row.jam
+                ).toFixed(2),
+
+                Number(
+                    row.rm
+                ).toFixed(2)
+
+            ]);
 
         }
-
     );
 
 
-    const table =
-
-    document.querySelector(
-        ".table-wrapper table"
-    );
-
-
-   pdf.autoTable({
-
-       html: table,
-
-       startY: 28,
+    const jumlahJam =
+        laporanTampungan.reduce(
+            (sum, row) =>
+                sum +
+                (
+                    Number(row.jam) || 0
+                ),
+            0
+        );
 
 
-        theme:
-        "grid",
+    const jumlahRM =
+        laporanTampungan.reduce(
+            (sum, row) =>
+                sum +
+                (
+                    Number(row.rm) || 0
+                ),
+            0
+        );
 
 
-        styles:{
+    rows.push([
 
-            fontSize:
-            7,
+        "",
 
-            cellPadding:
-            2
+        "",
 
-        },
+        "",
+
+        "",
+
+        "JUMLAH",
+
+        "",
+
+        jumlahJam.toFixed(2),
+
+        jumlahRM.toFixed(2)
+
+    ]);
 
 
-        headStyles:{
+    const csv =
+        rows.map(row =>
 
-            fillColor:
+            row.map(cell => {
 
+                const value =
+                    cell === null ||
+                    cell === undefined
+                        ? ""
+                        : String(cell);
+
+
+                return `"${value
+                    .replace(/"/g, '""')}"`;
+
+            }).join(",")
+
+        ).join("\r\n");
+
+
+    // BOM supaya Excel Malaysia/Windows
+    // baca UTF-8 dengan betul
+
+    const blob =
+        new Blob(
             [
-                61,
-                127,
-                134
-            ]
-
-        },
-
-
-        margin:{
-
-            left:
-            8,
-
-            right:
-            8
-
-        }
-
-    });
+                "\uFEFF" + csv
+            ],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
 
 
-    pdf.setFontSize(
-        8
-    );
+    const url =
+        URL.createObjectURL(blob);
 
 
-    pdf.text(
-
-        "FPB DUTY SYSTEM — WILAYAH TERENGGANU",
-
-        148,
-
-        202,
-
-        {
-
-            align:
-            "center"
-
-        }
-
-    );
+    const a =
+        document.createElement("a");
 
 
-    pdf.save(
+    a.href = url;
 
-        `Laporan_Pos_Tampungan_${bulan}_${tahun}.pdf`
 
-    );
+    a.download =
+        `Laporan_Tampungan_${bulan}_${tahun}.csv`;
+
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    document.body.removeChild(a);
+
+
+    URL.revokeObjectURL(url);
 
 }
+
+
+// =====================================================
+// EXPORT GLOBAL
+// =====================================================
+
+window.paparLaporanTampungan =
+    paparLaporanTampungan;
+
+window.cetakLaporanPDF =
+    cetakLaporanPDF;
+
+window.muatTurunCSV =
+    muatTurunCSV;
+
+
+// =====================================================
+// END
+// =====================================================
+
+console.log(
+    "✅ LAPORAN POS TAMPUNGAN READY"
+);
