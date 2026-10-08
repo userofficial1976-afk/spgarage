@@ -1759,6 +1759,268 @@ select.input option{
 
 
 <!-- =========================================================
+     MODAL TAMBAH STOK
+========================================================= -->
+
+<div id="modalTambahStok"
+     class="modal">
+
+    <div class="modal-box"
+         style="max-width:620px;">
+
+        <div class="modal-header">
+
+            <div>
+
+                <div class="text-lg font-bold text-white">
+                    Tambah Stok
+                </div>
+
+                <div class="text-xs text-slate-500 mt-1">
+                    Tambah kuantiti stok untuk produk yang dipilih.
+                </div>
+
+            </div>
+
+
+            <button type="button"
+                    class="action-btn"
+                    onclick="tutupModalTambahStok()">
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
+
+
+        <form id="formTambahStok"
+              onsubmit="simpanTambahStok(event)">
+
+            <div class="modal-body">
+
+                <input type="hidden"
+                       id="stokProdukId">
+
+
+                <!-- PRODUK -->
+
+                <div class="form-section">
+
+                    <div class="form-section-title">
+
+                        <i class="fa-solid fa-box"></i>
+
+                        Maklumat Produk
+
+                    </div>
+
+
+                    <div class="glass rounded-xl p-4">
+
+                        <div class="grid grid-cols-2 gap-4">
+
+                            <div>
+
+                                <div class="text-[10px] text-slate-600 uppercase">
+                                    Kod Sparepart
+                                </div>
+
+                                <div id="stokKodProduk"
+                                     class="text-teal-300 font-bold mt-1">
+                                    -
+                                </div>
+
+                            </div>
+
+
+                            <div>
+
+                                <div class="text-[10px] text-slate-600 uppercase">
+                                    Unit
+                                </div>
+
+                                <div id="stokUnitProduk"
+                                     class="text-white font-semibold mt-1">
+                                    PCS
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-span-2">
+
+                                <div class="text-[10px] text-slate-600 uppercase">
+                                    Nama Produk
+                                </div>
+
+                                <div id="stokNamaProduk"
+                                     class="text-white font-semibold mt-1">
+                                    -
+                                </div>
+
+                            </div>
+
+
+                            <div>
+
+                                <div class="text-[10px] text-slate-600 uppercase">
+                                    Stok Semasa
+                                </div>
+
+                                <div id="stokSemasaDisplay"
+                                     class="text-2xl font-bold text-white mt-1">
+                                    0
+                                </div>
+
+                            </div>
+
+
+                            <div>
+
+                                <div class="text-[10px] text-slate-600 uppercase">
+                                    Stok Selepas Tambah
+                                </div>
+
+                                <div id="stokSelepasDisplay"
+                                     class="text-2xl font-bold text-emerald-400 mt-1">
+                                    0
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- TAMBAH STOK -->
+
+                <div class="form-section">
+
+                    <div class="form-section-title">
+
+                        <i class="fa-solid fa-boxes-stacked"></i>
+
+                        Maklumat Stok Masuk
+
+                    </div>
+
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                        <div>
+
+                            <label class="form-label">
+                                Kuantiti Tambah
+                                <span class="required">*</span>
+                            </label>
+
+                            <input id="stokTambah"
+                                   type="number"
+                                   class="input"
+                                   min="0.01"
+                                   step="0.01"
+                                   required
+                                   placeholder="Contoh: 10"
+                                   oninput="kiraStokSelepas()">
+
+                            <div class="text-[10px] text-slate-600 mt-1">
+                                Masukkan jumlah stok yang baru diterima.
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <label class="form-label">
+                                Harga Kos Baharu (RM)
+                            </label>
+
+                            <input id="stokHargaKos"
+                                   type="number"
+                                   class="input"
+                                   min="0"
+                                   step="0.01"
+                                   placeholder="Contoh: 8.50">
+
+                            <div class="text-[10px] text-slate-600 mt-1">
+                                Kos semasa pembelian. Boleh dibiarkan kosong.
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <label class="form-label">
+                                No. Invoice / Rujukan
+                            </label>
+
+                            <input id="stokRujukan"
+                                   type="text"
+                                   class="input"
+                                   maxlength="100"
+                                   placeholder="Contoh: INV-00125">
+
+                        </div>
+
+
+                        <div>
+
+                            <label class="form-label">
+                                Catatan
+                            </label>
+
+                            <input id="stokCatatan"
+                                   type="text"
+                                   class="input"
+                                   maxlength="500"
+                                   placeholder="Contoh: Belian daripada supplier">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="px-5 py-4 border-t border-slate-800 flex justify-end gap-2">
+
+                <button type="button"
+                        class="btn btn-secondary"
+                        onclick="tutupModalTambahStok()">
+
+                    Batal
+
+                </button>
+
+
+                <button id="btnSimpanStok"
+                        type="submit"
+                        class="btn btn-primary">
+
+                    <i class="fa-solid fa-plus"></i>
+
+                    Tambah Stok
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+      
+<!-- =========================================================
      LOADING
 ========================================================= -->
 
@@ -2563,28 +2825,38 @@ function paparProduk(){
 
             <td>
 
-                <div class="flex items-center gap-1">
+<div class="flex items-center gap-1">
 
-                    <button type="button"
-                            class="action-btn"
-                            title="Edit"
-                            onclick="bukaModalEdit(${item.id})">
+    <button type="button"
+            class="action-btn"
+            title="Tambah Stok"
+            onclick="bukaModalTambahStok(${item.id})">
 
-                        <i class="fa-solid fa-pen"></i>
+        <i class="fa-solid fa-plus"></i>
 
-                    </button>
+    </button>
 
 
-                    <button type="button"
-                            class="action-btn delete"
-                            title="Padam"
-                            onclick="padamProduk(${item.id})">
+    <button type="button"
+            class="action-btn"
+            title="Edit"
+            onclick="bukaModalEdit(${item.id})">
 
-                        <i class="fa-solid fa-trash"></i>
+        <i class="fa-solid fa-pen"></i>
 
-                    </button>
+    </button>
 
-                </div>
+
+    <button type="button"
+            class="action-btn delete"
+            title="Padam"
+            onclick="padamProduk(${item.id})">
+
+        <i class="fa-solid fa-trash"></i>
+
+    </button>
+
+</div>
 
             </td>
 
@@ -3705,6 +3977,447 @@ async function muatSemula(){
 
 
 /* =========================================================
+   TAMBAH STOK
+========================================================= */
+
+let produkTambahStok = null;
+
+
+/* =========================================================
+   BUKA MODAL TAMBAH STOK
+========================================================= */
+
+function bukaModalTambahStok(id){
+
+    const item =
+        senaraiProduk.find(x =>
+            Number(x.id) === Number(id)
+        );
+
+
+    if(!item){
+
+        showToast(
+            'error',
+            'Produk tidak dijumpai',
+            'Rekod produk tidak dapat ditemui.'
+        );
+
+        return;
+
+    }
+
+
+    produkTambahStok = item;
+
+
+    document.getElementById('stokProdukId').value =
+        item.id;
+
+    document.getElementById('stokKodProduk').textContent =
+        item.kod_sparepart || '-';
+
+    document.getElementById('stokNamaProduk').textContent =
+        item.nama || '-';
+
+    document.getElementById('stokUnitProduk').textContent =
+        item.unit || 'PCS';
+
+
+    const stokSemasa =
+        Number(item.stok_semasa || 0);
+
+
+    document.getElementById('stokSemasaDisplay').textContent =
+        formatNumber(stokSemasa);
+
+
+    document.getElementById('stokSelepasDisplay').textContent =
+        formatNumber(stokSemasa);
+
+
+    document.getElementById('stokTambah').value =
+        '';
+
+    document.getElementById('stokHargaKos').value =
+        item.harga_kos ?? '';
+
+    document.getElementById('stokRujukan').value =
+        '';
+
+    document.getElementById('stokCatatan').value =
+        '';
+
+
+    document.getElementById('modalTambahStok')
+        .classList.add('show');
+
+
+    setTimeout(() => {
+
+        document.getElementById('stokTambah').focus();
+
+    },100);
+
+}
+
+
+/* =========================================================
+   KIRA STOK SELEPAS
+========================================================= */
+
+function kiraStokSelepas(){
+
+    if(!produkTambahStok){
+        return;
+    }
+
+
+    const stokSemasa =
+        Number(
+            produkTambahStok.stok_semasa || 0
+        );
+
+
+    const tambah =
+        parseNumber(
+            document.getElementById('stokTambah').value
+        );
+
+
+    const stokSelepas =
+        stokSemasa + tambah;
+
+
+    document.getElementById('stokSelepasDisplay')
+        .textContent =
+            formatNumber(stokSelepas);
+
+}
+
+
+/* =========================================================
+   TUTUP MODAL
+========================================================= */
+
+function tutupModalTambahStok(){
+
+    document.getElementById('modalTambahStok')
+        .classList.remove('show');
+
+    produkTambahStok = null;
+
+}
+
+
+/* =========================================================
+   SIMPAN TAMBAH STOK
+========================================================= */
+
+async function simpanTambahStok(event){
+
+    event.preventDefault();
+
+
+    if(!db){
+
+        showToast(
+            'error',
+            'Supabase tidak tersedia',
+            'Semak supabase-config.js.'
+        );
+
+        return;
+
+    }
+
+
+    if(!produkTambahStok){
+
+        showToast(
+            'error',
+            'Produk tidak dipilih',
+            'Sila pilih produk terlebih dahulu.'
+        );
+
+        return;
+
+    }
+
+
+    const produkId =
+        Number(
+            document.getElementById('stokProdukId').value
+        );
+
+
+    const stokTambah =
+        parseNumber(
+            document.getElementById('stokTambah').value
+        );
+
+
+    const hargaKosInput =
+        document.getElementById('stokHargaKos').value;
+
+
+    const hargaKos =
+        parseNumber(hargaKosInput);
+
+
+    const rujukan =
+        document.getElementById('stokRujukan')
+            .value
+            .trim();
+
+
+    const catatan =
+        document.getElementById('stokCatatan')
+            .value
+            .trim();
+
+
+    if(!Number.isFinite(stokTambah) || stokTambah <= 0){
+
+        showToast(
+            'warning',
+            'Kuantiti tidak sah',
+            'Masukkan kuantiti stok lebih daripada 0.'
+        );
+
+        return;
+
+    }
+
+
+    if(!Number.isFinite(hargaKos) || hargaKos < 0){
+
+        showToast(
+            'warning',
+            'Harga kos tidak sah',
+            'Harga kos tidak boleh negatif.'
+        );
+
+        return;
+
+    }
+
+
+    setLoading(
+        true,
+        'Menambah stok...'
+    );
+
+
+    try{
+
+        /* =====================================================
+           DAPATKAN STOK TERKINI DARI DATABASE
+           Supaya tidak bergantung kepada data lama di skrin.
+        ===================================================== */
+
+        const {
+            data: produkSemasa,
+            error: produkError
+        } = await db
+            .from('sparepart')
+            .select(`
+                id,
+                kod_sparepart,
+                nama,
+                unit,
+                stok_semasa,
+                harga_kos
+            `)
+            .eq('id',produkId)
+            .single();
+
+
+        if(produkError){
+            throw produkError;
+        }
+
+
+        if(!produkSemasa){
+
+            throw new Error(
+                'Produk tidak dijumpai dalam database.'
+            );
+
+        }
+
+
+        const stokSebelum =
+            Number(
+                produkSemasa.stok_semasa || 0
+            );
+
+
+        const stokSelepas =
+            stokSebelum + stokTambah;
+
+
+        /* =====================================================
+           UPDATE STOK PRODUK
+        ===================================================== */
+
+        const updateData = {
+
+            stok_semasa:
+                stokSelepas,
+
+            updated_at:
+                new Date().toISOString()
+
+        };
+
+
+        /*
+         * Jika harga kos dimasukkan,
+         * kemaskini harga kos produk.
+         */
+
+        if(hargaKosInput !== ''){
+
+            updateData.harga_kos =
+                hargaKos;
+
+        }
+
+
+        const {
+            error: updateError
+        } = await db
+            .from('sparepart')
+            .update(updateData)
+            .eq('id',produkId);
+
+
+        if(updateError){
+            throw updateError;
+        }
+
+
+        /* =====================================================
+           REKOD PERGERAKAN STOK
+        ===================================================== */
+
+        const {
+            error: movementError
+        } = await db
+            .from('stok_pergerakan')
+            .insert({
+
+                sparepart_id:
+                    produkId,
+
+                jenis:
+                    'STOK_MASUK',
+
+                kuantiti:
+                    stokTambah,
+
+                stok_sebelum:
+                    stokSebelum,
+
+                stok_selepas:
+                    stokSelepas,
+
+                rujukan:
+                    rujukan || null,
+
+                catatan:
+                    catatan || null,
+
+                created_at:
+                    new Date().toISOString()
+
+            });
+
+
+        if(movementError){
+
+            /*
+             * Jika rekod pergerakan gagal, cuba pulangkan
+             * stok kepada nilai asal.
+             */
+
+            try{
+
+                await db
+                    .from('sparepart')
+                    .update({
+
+                        stok_semasa:
+                            stokSebelum,
+
+                        updated_at:
+                            new Date().toISOString()
+
+                    })
+                    .eq('id',produkId);
+
+            }catch(rollbackError){
+
+                console.error(
+                    'ROLLBACK STOK GAGAL:',
+                    rollbackError
+                );
+
+            }
+
+
+            throw movementError;
+
+        }
+
+
+        /* =====================================================
+           SELESAI
+        ===================================================== */
+
+        showToast(
+            'success',
+            'Stok berjaya ditambah',
+            `${produkSemasa.nama}: ${formatNumber(stokSebelum)} → ${formatNumber(stokSelepas)} ${produkSemasa.unit || 'PCS'}`
+        );
+
+
+        tutupModalTambahStok();
+
+
+        await muatProduk();
+
+
+    }catch(error){
+
+        console.error(
+            'TAMBAH STOK ERROR:',
+            error
+        );
+
+
+        showToast(
+            'error',
+            'Gagal tambah stok',
+            error.message ||
+            'Sila cuba semula.'
+        );
+
+
+    }finally{
+
+        setLoading(false);
+
+    }
+
+}
+
+
+
+
+      
+/* =========================================================
    HELPERS
 ========================================================= */
 
@@ -3965,23 +4678,45 @@ document.getElementById('modalProduk')
 
     });
 
+document.getElementById('modalTambahStok')
+    .addEventListener('click',function(event){
 
+        if(event.target === this){
+
+            tutupModalTambahStok();
+
+        }
+
+    });
 /* =========================================================
    ESC CLOSE MODAL
 ========================================================= */
 
 document.addEventListener('keydown',function(event){
 
-    if(event.key === 'Escape'){
+    if(event.key !== 'Escape'){
+        return;
+    }
 
-        const modal =
-            document.getElementById('modalProduk');
 
-        if(modal.classList.contains('show')){
+    const modalProduk =
+        document.getElementById('modalProduk');
 
-            tutupModal();
 
-        }
+    const modalTambahStok =
+        document.getElementById('modalTambahStok');
+
+
+    if(modalProduk.classList.contains('show')){
+
+        tutupModal();
+
+    }
+
+
+    if(modalTambahStok.classList.contains('show')){
+
+        tutupModalTambahStok();
 
     }
 
@@ -4004,4 +4739,4 @@ document.addEventListener('keydown',function(event){
 
 </body>
 </html>
-```
+
