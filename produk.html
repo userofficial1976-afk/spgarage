@@ -7,7 +7,7 @@
 <title>Produk / Sparepart — Inventori & POS</title>
 <link rel="icon" type="image/png" href="logomdp.png">
 <script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <style>
@@ -61,6 +61,7 @@ function formatRM(v){return Number(v||0).toLocaleString('ms-MY',{minimumFraction
 modalProduk.addEventListener('click',e=>{if(e.target===modalProduk)tutupModal()});modalTambahStok.addEventListener('click',e=>{if(e.target===modalTambahStok)tutupModalTambahStok()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){tutupModal();tutupModalTambahStok()}});
 </script>
 <!-- PENTING: panggil shared sidebar selepas elemen #sharedSidebar dan #sharedMobileNav sudah wujud. Jika nama fail sebenar bukan sidebar.js, tukar src ini kepada nama fail sebenar. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"></script>
 <script src="sidebar.js"></script>
 </body>
 </html>
