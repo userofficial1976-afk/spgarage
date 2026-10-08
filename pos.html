@@ -1,0 +1,3679 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>POS / Cashier — Inventori & POS</title>
+
+<link rel="icon" type="image/png" href="logomdp.png">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+
+<style>
+:root {
+    --bg: #0b1220;
+    --card: #0f172a;
+    --card2: #111c31;
+    --border: rgba(148,163,184,.14);
+    --teal: #2dd4bf;
+    --orange: #f97316;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --danger: #ef4444;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: "Century Gothic",
+                 CenturyGothic,
+                 AppleGothic,
+                 sans-serif;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* =========================
+   MAIN LAYOUT
+========================= */
+
+.main {
+    margin-left: 288px;
+    min-height: 100vh;
+}
+
+.pos {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 410px;
+    overflow: hidden;
+}
+
+/* =========================
+   PRODUCT / CATALOG AREA
+========================= */
+
+.catalog {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.top {
+    padding: 18px 20px;
+    background: rgba(15,23,42,.92);
+    border-bottom: 1px solid var(--border);
+}
+
+.search {
+    width: 100%;
+    background: #07101e;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    color: white;
+    padding: 12px 14px;
+    outline: none;
+}
+
+.search:focus {
+    border-color: rgba(45,212,191,.6);
+}
+
+/* =========================
+   CATEGORY
+========================= */
+
+.cats {
+    display: flex;
+    gap: 8px;
+    overflow: auto;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.cat {
+    border: 1px solid var(--border);
+    background: #101a2d;
+    color: #cbd5e1;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.cat:hover {
+    border-color: rgba(249,115,22,.5);
+}
+
+.cat.active {
+    background: #f97316;
+    border-color: #f97316;
+    color: #fff;
+}
+
+/* =========================
+   PRODUCT GRID
+========================= */
+
+.products {
+    padding: 16px 20px;
+    overflow: auto;
+    flex: 1;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap: 12px;
+}
+
+.product {
+    min-height: 145px;
+    border: 1px solid var(--border);
+    background: #0f1a2e;
+    border-radius: 14px;
+    padding: 12px;
+    text-align: left;
+    color: white;
+    cursor: pointer;
+    transition: .18s;
+    display: flex;
+    flex-direction: column;
+}
+
+.product:hover {
+    transform: translateY(-2px);
+    border-color: #f97316;
+}
+
+.pic {
+    height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 7px;
+}
+
+.pic img {
+    width: 74px;
+    height: 62px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.noimg {
+    font-size: 30px;
+    color: #475569;
+}
+
+.pname {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.pcode {
+    font-size: 10px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.prow {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+}
+
+.price {
+    font-size: 13px;
+    font-weight: 800;
+    color: #fb923c;
+}
+
+.stock {
+    font-size: 9px;
+    color: #94a3b8;
+}
+
+.stock.low {
+    color: #fbbf24;
+}
+
+/* =========================
+   BARCODE CARD
+========================= */
+
+.scan {
+    border: 2px dashed rgba(249,115,22,.55);
+    align-items: center;
+    justify-content: center;
+    color: #fb923c;
+}
+
+.scan:hover {
+    background: rgba(249,115,22,.05);
+}
+
+/* =========================
+   CART / ORDER
+========================= */
+
+.cart {
+    background: #f8fafc;
+    color: #0f172a;
+    border-left: 1px solid #dbe2ea;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.carthead {
+    height: 78px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.clear {
+    border: 0;
+    background: #fee2e2;
+    color: #dc2626;
+    border-radius: 8px;
+    padding: 8px 11px;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.clear:hover {
+    background: #fecaca;
+}
+
+/* =========================
+   CART ITEMS
+========================= */
+
+.items {
+    flex: 1;
+    overflow: auto;
+    padding: 7px 14px;
+}
+
+.item {
+    display: grid;
+    grid-template-columns: 42px minmax(0,1fr) auto auto;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.thumb {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.thumb img {
+    max-width: 42px;
+    max-height: 42px;
+    object-fit: contain;
+}
+
+.iname {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.icode {
+    font-size: 9px;
+    color: #94a3b8;
+}
+
+/* =========================
+   QUANTITY
+========================= */
+
+.qty {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.qty button {
+    width: 26px;
+    height: 26px;
+    border: 0;
+    border-radius: 7px;
+    background: #eef2f7;
+    cursor: pointer;
+}
+
+.qty button:hover {
+    background: #e2e8f0;
+}
+
+.iq {
+    width: 23px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.itotal {
+    font-size: 11px;
+    font-weight: bold;
+    width: 65px;
+    text-align: right;
+}
+
+.del {
+    border: 0;
+    background: transparent;
+    color: #dc2626;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+/* =========================
+   PAYMENT SUMMARY
+========================= */
+
+.summary {
+    padding: 14px;
+    border-top: 1px solid #e5e7eb;
+    background: white;
+}
+
+.paytypes {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 6px;
+    margin: 8px 0 12px;
+}
+
+.paytype {
+    padding: 8px 4px;
+    border: 1px solid #dbe2ea;
+    background: white;
+    border-radius: 8px;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.paytype:hover {
+    border-color: #f97316;
+}
+
+.paytype.active {
+    border-color: #f97316;
+    background: #fff7ed;
+    color: #ea580c;
+    font-weight: bold;
+}
+
+/* =========================
+   FORM
+========================= */
+
+.formrow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.label {
+    font-size: 9px;
+    color: #64748b;
+}
+
+.field {
+    width: 100%;
+    margin-top: 4px;
+    border: 1px solid #dbe2ea;
+    padding: 9px;
+    border-radius: 8px;
+    outline: none;
+}
+
+.field:focus {
+    border-color: #f97316;
+}
+
+/* =========================
+   TOTAL
+========================= */
+
+.sumrow {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin: 7px 0;
+}
+
+.total {
+    font-size: 17px;
+    font-weight: 900;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+/* =========================
+   PAY BUTTON
+========================= */
+
+.pay {
+    width: 100%;
+    border: 0;
+    border-radius: 10px;
+    background: #f97316;
+    color: white;
+    font-weight: 800;
+    padding: 13px;
+    cursor: pointer;
+    margin-top: 11px;
+}
+
+.pay:hover {
+    background: #ea580c;
+}
+
+.pay:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+}
+
+/* =========================
+   EMPTY CART
+========================= */
+
+.empty {
+    text-align: center;
+    color: #94a3b8;
+    padding: 50px 10px;
+    font-size: 12px;
+}
+
+/* =========================
+   TOAST MESSAGE
+========================= */
+
+.toast {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 3000;
+    background: #0f172a;
+    color: white;
+    border: 1px solid var(--border);
+    padding: 13px 16px;
+    border-radius: 12px;
+    display: none;
+    max-width: 380px;
+}
+
+.toast.show {
+    display: block;
+}
+
+.toast.error {
+    border-color: #ef4444;
+}
+
+.toast.success {
+    border-color: #22c55e;
+}
+
+/* =========================
+   LOADING
+========================= */
+
+.loading {
+    position: fixed;
+    inset: 0;
+    background: rgba(2,6,23,.75);
+    z-index: 2500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.loading.show {
+    display: flex;
+}
+
+.box {
+    background: #0f172a;
+    border: 1px solid var(--border);
+    padding: 22px 30px;
+    border-radius: 14px;
+}
+
+.mobileCart {
+    display: none;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:1350px) {
+
+    .grid {
+        grid-template-columns: repeat(3,minmax(0,1fr));
+    }
+
+    .pos {
+        grid-template-columns: minmax(0,1fr) 370px;
+    }
+
+}
+
+@media(max-width:1023px) {
+
+    .main {
+        margin-left: 0;
+        padding-bottom: 67px;
+    }
+
+    .pos {
+        height: calc(100vh - 67px);
+        grid-template-columns: minmax(0,1fr) 345px;
+    }
+
+    .grid {
+        grid-template-columns: repeat(3,minmax(0,1fr));
+    }
+
+}
+
+@media(max-width:760px) {
+
+    .pos {
+        display: block;
+        height: auto;
+    }
+
+    .catalog {
+        min-height: 100vh;
+    }
+
+    .cart {
+        display: none;
+    }
+
+    .products {
+        overflow: visible;
+    }
+
+    .grid {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        padding-bottom: 90px;
+    }
+
+    .mobileCart {
+        display: flex;
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        bottom: 76px;
+        z-index: 100;
+        background: white;
+        color: #0f172a;
+        border-radius: 12px;
+        padding: 10px 13px;
+        box-shadow: 0 10px 35px rgba(0,0,0,.35);
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .top {
+        padding: 14px;
+    }
+
+    .cats,
+    .products {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =========================
+     SHARED SIDEBAR
+========================= -->
+
+<div id="sharedSidebar"></div>
+
+
+<!-- =========================
+     POS MAIN
+========================= -->
+
+<main class="main">
+
+<div class="pos">
+
+<!-- =========================
+     PRODUCT AREA
+========================= -->
+
+<section class="catalog">
+
+    <!-- TOP -->
+    <div class="top">
+
+        <div class="flex items-center justify-between gap-4 mb-3">
+
+            <div>
+
+                <div
+                    class="text-[10px] text-teal-400
+                           uppercase tracking-widest font-bold">
+
+                    POS / Cashier
+
+                </div>
+
+                <h1 class="text-xl font-bold text-white">
+
+                    Jualan Sparepart
+
+                </h1>
+
+            </div>
+
+
+            <!-- USER -->
+            <div class="text-right">
+
+                <div
+                    id="topUser"
+                    class="text-xs font-semibold">
+
+                    Pengguna
+
+                </div>
+
+                <div
+                    id="topRole"
+                    class="text-[10px] text-slate-500">
+
+                    -
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SEARCH -->
+        <input
+            id="searchInput"
+            class="search"
+            type="text"
+            placeholder="Cari nama, kod sparepart, no. part atau scan barcode..."
+            autocomplete="off"
+        >
+
+    </div>
+
+
+    <!-- =========================
+         CATEGORY BAR
+    ========================= -->
+
+    <div
+        id="kategoriBar"
+        class="cats">
+
+        <button
+            class="cat active"
+            data-id="">
+
+            Semua Item
+
+        </button>
+
+    </div>
+
+
+    <!-- =========================
+         PRODUCT GRID
+    ========================= -->
+
+    <div class="products">
+
+        <div
+            id="produkGrid"
+            class="grid">
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     CART / CURRENT ORDER
+========================= -->
+
+<aside class="cart">
+
+
+    <!-- CART HEADER -->
+    <div class="carthead">
+
+        <div>
+
+            <div class="font-bold text-sm">
+
+                Pesanan Semasa
+
+            </div>
+
+            <div
+                id="orderNumber"
+                class="text-[10px] text-slate-500 mt-1">
+
+                Order: Baharu
+
+            </div>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="clear"
+            onclick="kosongkanTroli()">
+
+            Kosongkan
+
+        </button>
+
+    </div>
+
+
+    <!-- =========================
+         CART ITEMS
+    ========================= -->
+
+    <div
+        id="cartItems"
+        class="items">
+    </div>
+
+
+    <!-- =========================
+         PAYMENT
+    ========================= -->
+
+    <div class="summary">
+
+
+        <div class="text-[10px] font-bold text-slate-600">
+
+            Kaedah Bayaran
+
+        </div>
+
+
+        <!-- PAYMENT METHOD -->
+
+        <div
+            id="payTypes"
+            class="paytypes">
+
+
+            <button
+                type="button"
+                class="paytype active"
+                data-pay="TUNAI">
+
+                Tunai
+
+            </button>
+
+
+            <button
+                type="button"
+                class="paytype"
+                data-pay="KAD">
+
+                Kad
+
+            </button>
+
+
+            <button
+                type="button"
+                class="paytype"
+                data-pay="DUITNOW">
+
+                QR / DuitNow
+
+            </button>
+
+
+            <button
+                type="button"
+                class="paytype"
+                data-pay="ONLINE_BANKING">
+
+                Online
+
+            </button>
+
+        </div>
+
+
+        <!-- =========================
+             CASH PAYMENT
+        ========================= -->
+
+        <div
+            id="cashFields"
+            class="formrow">
+
+
+            <label class="label">
+
+                Tunai Diterima
+
+                <input
+                    id="bayaranInput"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="field"
+                    placeholder="0.00"
+                >
+
+            </label>
+
+
+            <div class="label">
+
+                Baki
+
+                <div
+                    id="bakiDisplay"
+                    class="field bg-emerald-50
+                           text-emerald-700 font-bold">
+
+                    RM 0.00
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             SUMMARY
+        ========================= -->
+
+        <div class="sumrow">
+
+            <span>Sub Total</span>
+
+            <b id="subtotalDisplay">
+
+                RM 0.00
+
+            </b>
+
+        </div>
+
+
+        <div class="sumrow">
+
+            <span>Diskaun</span>
+
+            <span>
+
+                RM 0.00
+
+            </span>
+
+        </div>
+
+
+        <div class="sumrow">
+
+            <span>Cukai</span>
+
+            <span>
+
+                RM 0.00
+
+            </span>
+
+        </div>
+
+
+        <div class="sumrow total">
+
+            <span>
+
+                Jumlah
+
+            </span>
+
+            <span id="totalDisplay">
+
+                RM 0.00
+
+            </span>
+
+        </div>
+
+
+        <!-- PAY NOW -->
+
+        <button
+            id="btnBayar"
+            type="button"
+            class="pay"
+            onclick="bayarSekarang()"
+            disabled>
+
+            Bayar Sekarang
+
+        </button>
+
+    </div>
+
+</aside>
+
+</div>
+
+</main>
+
+
+<!-- =========================
+     MOBILE NAVIGATION
+========================= -->
+
+<div id="sharedMobileNav"></div>
+
+
+<!-- =========================
+     MOBILE CART
+========================= -->
+
+<div
+    id="mobileCart"
+    class="mobileCart">
+
+    <div>
+
+        <div
+            id="mobileCount"
+            class="text-[9px] text-slate-500">
+
+            0 item
+
+        </div>
+
+        <div
+            id="mobileTotal"
+            class="font-black">
+
+            RM 0.00
+
+        </div>
+
+    </div>
+
+
+    <button
+        type="button"
+        onclick="alert(
+            'Gunakan paparan tablet/desktop untuk panel pembayaran penuh.'
+        )"
+        class="bg-orange-500
+               text-white
+               px-4 py-2
+               rounded-lg
+               text-xs
+               font-bold">
+
+        Troli
+
+    </button>
+
+</div>
+
+
+<!-- =========================
+     LOADING OVERLAY
+========================= -->
+
+<div
+    id="loading"
+    class="loading">
+
+    <div
+        id="loadingText"
+        class="box">
+
+        Memproses...
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     TOAST
+========================= -->
+
+<div
+    id="toast"
+    class="toast">
+
+    <b id="toastTitle"></b>
+
+    <div
+        id="toastMsg"
+        class="text-xs mt-1 text-slate-300">
+    </div>
+
+</div>
+
+<script>
+
+/* =========================================================
+   SUPABASE / GLOBAL VARIABLE
+========================================================= */
+
+const db = window.supabaseClient;
+
+const STORAGE_BUCKET = 'produk';
+
+let produk = [];
+let troli = [];
+
+let kategoriAktif = '';
+let kaedah = 'TUNAI';
+
+let toastTimer = null;
+
+
+/* =========================================================
+   DOM CONTENT LOADED
+========================================================= */
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+    paparPengguna();
+
+    pasangEvent();
+
+    if (!db) {
+
+        showToast(
+            'error',
+            'Supabase tidak tersedia',
+            'Semak fail supabase-config.js'
+        );
+
+        return;
+    }
+
+    await init();
+
+});
+
+
+/* =========================================================
+   EVENT LISTENER
+========================================================= */
+
+function pasangEvent() {
+
+    /* =========================
+       CARI PRODUK
+    ========================= */
+
+    searchInput.addEventListener('input', paparProduk);
+
+
+    /* =========================
+       INPUT BAYARAN TUNAI
+    ========================= */
+
+    bayaranInput.addEventListener('input', paparTroli);
+
+
+    /* =========================
+       KAEDAH BAYARAN
+    ========================= */
+
+    document
+        .getElementById('payTypes')
+        .addEventListener('click', (e) => {
+
+            const btn = e.target.closest('[data-pay]');
+
+            if (!btn) return;
+
+
+            kaedah = btn.dataset.pay;
+
+
+            document
+                .querySelectorAll('.paytype')
+                .forEach(x => {
+
+                    x.classList.toggle(
+                        'active',
+                        x === btn
+                    );
+
+                });
+
+
+            /* =========================
+               TUNAI
+            ========================= */
+
+            if (kaedah === 'TUNAI') {
+
+                cashFields.style.display = 'grid';
+
+            } else {
+
+                cashFields.style.display = 'none';
+
+            }
+
+
+            paparTroli();
+
+        });
+
+}
+
+
+/* =========================================================
+   INITIAL POS
+========================================================= */
+
+async function init() {
+
+    setLoading(
+        true,
+        'Memuatkan produk...'
+    );
+
+    try {
+
+        await Promise.all([
+            muatProduk(),
+            muatKategori()
+        ]);
+
+        paparTroli();
+
+    } catch (e) {
+
+        console.error(
+            'RALAT INIT POS:',
+            e
+        );
+
+        showToast(
+            'error',
+            'Gagal memuatkan POS',
+            e.message || 'Ralat tidak diketahui.'
+        );
+
+    } finally {
+
+        setLoading(false);
+
+    }
+
+}
+
+
+/* =========================================================
+   MUAT PRODUK
+========================================================= */
+
+async function muatProduk() {
+
+    const {
+        data,
+        error
+    } = await db
+        .from('sparepart')
+        .select(`
+            id,
+            kod_sparepart,
+            nama,
+            no_part,
+            kategori_id,
+            unit,
+            stok_semasa,
+            stok_minimum,
+            harga_jual,
+            image_path,
+            status
+        `)
+        .eq('status', true)
+        .order('nama', {
+            ascending: true
+        });
+
+
+    if (error) {
+
+        throw error;
+
+    }
+
+
+    produk = data || [];
+
+
+    paparProduk();
+
+}
+
+
+/* =========================================================
+   MUAT KATEGORI
+========================================================= */
+
+async function muatKategori() {
+
+    const {
+        data,
+        error
+    } = await db
+        .from('kategori')
+        .select(`
+            id,
+            nama,
+            status
+        `)
+        .eq('status', true)
+        .order('nama', {
+            ascending: true
+        });
+
+
+    if (error) {
+
+        throw error;
+
+    }
+
+
+    const kategori = data || [];
+
+
+    /* Elak kategori duplicate jika refresh */
+
+    kategoriBar.innerHTML = `
+
+        <button
+            type="button"
+            class="cat active"
+            data-id="">
+
+            Semua Item
+
+        </button>
+
+    `;
+
+
+    kategori.forEach(k => {
+
+        const btn =
+            document.createElement('button');
+
+
+        btn.type = 'button';
+
+        btn.className = 'cat';
+
+        btn.dataset.id = k.id;
+
+        btn.textContent = k.nama;
+
+
+        kategoriBar.appendChild(btn);
+
+    });
+
+
+    /* =========================
+       FILTER KATEGORI
+    ========================= */
+
+    kategoriBar.onclick = (e) => {
+
+        const btn =
+            e.target.closest('.cat');
+
+
+        if (!btn) return;
+
+
+        kategoriAktif =
+            btn.dataset.id || '';
+
+
+        document
+            .querySelectorAll('.cat')
+            .forEach(x => {
+
+                x.classList.toggle(
+                    'active',
+                    x === btn
+                );
+
+            });
+
+
+        paparProduk();
+
+    };
+
+}
+
+
+/* =========================================================
+   PAPAR PRODUK
+========================================================= */
+
+function paparProduk() {
+
+    const search =
+        (searchInput.value || '')
+            .trim()
+            .toLowerCase();
+
+
+    const senarai =
+        produk.filter(x => {
+
+
+            /* =========================
+               FILTER KATEGORI
+            ========================= */
+
+            if (
+                kategoriAktif &&
+                String(x.kategori_id) !==
+                String(kategoriAktif)
+            ) {
+
+                return false;
+
+            }
+
+
+            /* =========================
+               SEARCH
+            ========================= */
+
+            if (search) {
+
+                const text = [
+
+                    x.nama,
+                    x.kod_sparepart,
+                    x.no_part
+
+                ]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+
+
+                if (!text.includes(search)) {
+
+                    return false;
+
+                }
+
+            }
+
+
+            return true;
+
+        });
+
+
+    produkGrid.innerHTML = '';
+
+
+    /* =====================================================
+       SCAN BARCODE CARD
+    ===================================================== */
+
+    const scanCard =
+        document.createElement('button');
+
+
+    scanCard.type = 'button';
+
+    scanCard.className =
+        'product scan';
+
+
+    scanCard.innerHTML = `
+
+        <div style="
+            font-size:34px;
+            margin-bottom:7px;
+        ">
+            ▥
+        </div>
+
+        <div
+            style="
+                font-size:12px;
+                font-weight:700;
+            "
+        >
+            Scan Item Barcode
+        </div>
+
+        <div
+            style="
+                font-size:9px;
+                color:#94a3b8;
+                margin-top:4px;
+            "
+        >
+            Kod / barcode produk
+        </div>
+
+    `;
+
+
+    scanCard.onclick = () => {
+
+        searchInput.focus();
+
+    };
+
+
+    produkGrid.appendChild(
+        scanCard
+    );
+
+
+    /* =====================================================
+       TIADA PRODUK
+    ===================================================== */
+
+    if (!senarai.length) {
+
+        const kosong =
+            document.createElement('div');
+
+
+        kosong.style.cssText = `
+            grid-column:1/-1;
+            padding:50px 20px;
+            text-align:center;
+            color:#64748b;
+            font-size:12px;
+        `;
+
+
+        kosong.innerHTML = `
+
+            <div
+                style="
+                    font-size:30px;
+                    margin-bottom:8px;
+                "
+            >
+                □
+            </div>
+
+            Tiada produk dijumpai.
+
+        `;
+
+
+        produkGrid.appendChild(
+            kosong
+        );
+
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       PRODUCT CARD
+    ===================================================== */
+
+    senarai.forEach(x => {
+
+        const card =
+            document.createElement('button');
+
+
+        card.type = 'button';
+
+        card.className = 'product';
+
+
+        const stok =
+            Number(
+                x.stok_semasa || 0
+            );
+
+
+        const stokMinimum =
+            Number(
+                x.stok_minimum || 0
+            );
+
+
+        const url =
+            gambarUrl(
+                x.image_path
+            );
+
+
+        /* =========================
+           STATUS STOK
+        ========================= */
+
+        let stokClass = '';
+
+        let stokText = `
+            Stok ${num(stok)}
+            ${escapeHtml(x.unit || 'PCS')}
+        `;
+
+
+        if (stok <= 0) {
+
+            stokClass = 'low';
+
+            stokText = `
+                STOK KOSONG
+            `;
+
+        } else if (
+            stokMinimum > 0 &&
+            stok <= stokMinimum
+        ) {
+
+            stokClass = 'low';
+
+        }
+
+
+        /* =========================
+           GAMBAR
+        ========================= */
+
+        const gambar = url
+            ? `
+                <img
+                    src="${escapeAttribute(url)}"
+                    alt="${escapeAttribute(x.nama || 'Produk')}"
+                    loading="lazy"
+                >
+              `
+            : `
+                <span class="noimg">
+                    ▣
+                </span>
+              `;
+
+
+        /* =========================
+           CARD HTML
+        ========================= */
+
+        card.innerHTML = `
+
+            <div class="pic">
+
+                ${gambar}
+
+            </div>
+
+
+            <div class="pname">
+
+                ${escapeHtml(
+                    x.nama || '-'
+                )}
+
+            </div>
+
+
+            <div class="pcode">
+
+                #${escapeHtml(
+                    x.kod_sparepart || '-'
+                )}
+
+            </div>
+
+
+            ${
+                x.no_part
+                    ? `
+                        <div
+                            style="
+                                font-size:9px;
+                                color:#64748b;
+                                margin-top:2px;
+                            "
+                        >
+                            Part:
+                            ${escapeHtml(
+                                x.no_part
+                            )}
+                        </div>
+                      `
+                    : ''
+            }
+
+
+            <div class="prow">
+
+                <span class="price">
+
+                    RM ${formatRM(
+                        x.harga_jual
+                    )}
+
+                </span>
+
+
+                <span
+                    class="stock ${stokClass}"
+                >
+
+                    ${stokText}
+
+                </span>
+
+            </div>
+
+        `;
+
+
+        /* =========================
+           DISABLE JIKA STOK KOSONG
+        ========================= */
+
+        if (stok <= 0) {
+
+            card.style.opacity = '.55';
+
+        }
+
+
+        card.onclick = () => {
+
+            tambahTroli(
+                x.id
+            );
+
+        };
+
+
+        produkGrid.appendChild(
+            card
+        );
+
+    });
+
+}
+
+
+/* =========================================================
+   TAMBAH PRODUK KE TROLI
+========================================================= */
+
+function tambahTroli(id) {
+
+    const p =
+        produk.find(
+            x =>
+                Number(x.id) ===
+                Number(id)
+        );
+
+
+    if (!p) {
+
+        return;
+
+    }
+
+
+    const stok =
+        Number(
+            p.stok_semasa || 0
+        );
+
+
+    /* =========================
+       STOK KOSONG
+    ========================= */
+
+    if (stok <= 0) {
+
+        showToast(
+            'error',
+            'Stok kosong',
+            p.nama
+        );
+
+        return;
+
+    }
+
+
+    /* =========================
+       SEMAK ITEM SUDAH ADA
+    ========================= */
+
+    const item =
+        troli.find(
+            x =>
+                Number(x.id) ===
+                Number(p.id)
+        );
+
+
+    if (item) {
+
+
+        /* =========================
+           SEMAK STOK
+        ========================= */
+
+        if (
+            item.kuantiti + 1 >
+            stok
+        ) {
+
+            showToast(
+                'error',
+                'Stok tidak mencukupi',
+                `Baki ${num(stok)} ${p.unit || 'PCS'}`
+            );
+
+            return;
+
+        }
+
+
+        item.kuantiti += 1;
+
+
+    } else {
+
+
+        /* =========================
+           MASUKKAN ITEM BARU
+        ========================= */
+
+        troli.push({
+
+            id: p.id,
+
+            kod_sparepart:
+                p.kod_sparepart,
+
+            nama:
+                p.nama,
+
+            harga:
+                Number(
+                    p.harga_jual || 0
+                ),
+
+            kuantiti: 1,
+
+            stok:
+                stok,
+
+            image_path:
+                p.image_path,
+
+            unit:
+                p.unit || 'PCS'
+
+        });
+
+    }
+
+
+    paparTroli();
+
+}
+
+
+/* =========================================================
+   TAMBAH / KURANG KUANTITI
+========================================================= */
+
+function ubahQty(
+    id,
+    perubahan
+) {
+
+    const item =
+        troli.find(
+            x =>
+                Number(x.id) ===
+                Number(id)
+        );
+
+
+    if (!item) {
+
+        return;
+
+    }
+
+
+    const kuantitiBaharu =
+        Number(item.kuantiti) +
+        Number(perubahan);
+
+
+    /* =========================
+       JIKA 0, BUANG ITEM
+    ========================= */
+
+    if (kuantitiBaharu <= 0) {
+
+        buangItem(id);
+
+        return;
+
+    }
+
+
+    /* =========================
+       JANGAN LEBIH STOK
+    ========================= */
+
+    if (
+        kuantitiBaharu >
+        Number(item.stok)
+    ) {
+
+        showToast(
+            'error',
+            'Stok tidak mencukupi',
+            `Baki ${num(item.stok)} ${item.unit}`
+        );
+
+        return;
+
+    }
+
+
+    item.kuantiti =
+        kuantitiBaharu;
+
+
+    paparTroli();
+
+}
+
+
+/* =========================================================
+   BUANG SATU ITEM
+========================================================= */
+
+function buangItem(id) {
+
+    troli =
+        troli.filter(
+            x =>
+                Number(x.id) !==
+                Number(id)
+        );
+
+
+    paparTroli();
+
+}
+
+
+/* =========================================================
+   KOSONGKAN TROLI
+========================================================= */
+
+function kosongkanTroli() {
+
+    if (!troli.length) {
+
+        return;
+
+    }
+
+
+    const jawab =
+        confirm(
+            'Kosongkan semua item dalam troli?'
+        );
+
+
+    if (!jawab) {
+
+        return;
+
+    }
+
+
+    troli = [];
+
+
+    bayaranInput.value = '';
+
+
+    paparTroli();
+
+}
+
+
+/* =========================================================
+   PAPAR TROLI
+========================================================= */
+
+function paparTroli() {
+
+    cartItems.innerHTML = '';
+
+
+    /* =========================
+       TROLI KOSONG
+    ========================= */
+
+    if (!troli.length) {
+
+        cartItems.innerHTML = `
+
+            <div class="empty">
+
+                <div
+                    style="
+                        font-size:35px;
+                        margin-bottom:10px;
+                    "
+                >
+                    🛒
+                </div>
+
+                <div
+                    style="
+                        color:#475569;
+                        font-weight:700;
+                        margin-bottom:4px;
+                    "
+                >
+                    Troli masih kosong
+                </div>
+
+                <div>
+                    Pilih produk untuk
+                    memulakan jualan.
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =========================
+       ITEM TROLI
+    ========================= */
+
+    troli.forEach(item => {
+
+        const url =
+            gambarUrl(
+                item.image_path
+            );
+
+
+        const row =
+            document.createElement(
+                'div'
+            );
+
+
+        row.className = 'item';
+
+
+        const gambar = url
+            ? `
+                <img
+                    src="${escapeAttribute(url)}"
+                    alt="${escapeAttribute(item.nama)}"
+                >
+              `
+            : '▣';
+
+
+        row.innerHTML = `
+
+            <!-- GAMBAR -->
+
+            <div class="thumb">
+
+                ${gambar}
+
+            </div>
+
+
+            <!-- PRODUK -->
+
+            <div>
+
+                <div class="iname">
+
+                    ${escapeHtml(
+                        item.nama
+                    )}
+
+                </div>
+
+
+                <div class="icode">
+
+                    ${escapeHtml(
+                        item.kod_sparepart
+                    )}
+
+                    ·
+
+                    RM ${formatRM(
+                        item.harga
+                    )}
+
+                </div>
+
+            </div>
+
+
+            <!-- QUANTITY -->
+
+            <div class="qty">
+
+                <button
+                    type="button"
+                    onclick="
+                        ubahQty(
+                            ${Number(item.id)},
+                            -1
+                        )
+                    "
+                >
+                    −
+                </button>
+
+
+                <span class="iq">
+
+                    ${num(
+                        item.kuantiti
+                    )}
+
+                </span>
+
+
+                <button
+                    type="button"
+                    onclick="
+                        ubahQty(
+                            ${Number(item.id)},
+                            1
+                        )
+                    "
+                >
+                    +
+                </button>
+
+            </div>
+
+
+            <!-- TOTAL ITEM -->
+
+            <div>
+
+                <div class="itotal">
+
+                    RM ${formatRM(
+                        item.harga *
+                        item.kuantiti
+                    )}
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="del"
+                    onclick="
+                        buangItem(
+                            ${Number(item.id)}
+                        )
+                    "
+                >
+                    Padam
+                </button>
+
+            </div>
+
+        `;
+
+
+        cartItems.appendChild(
+            row
+        );
+
+    });
+
+
+    /* =====================================================
+       TOTAL
+    ===================================================== */
+
+    const jumlah =
+        kiraTotal();
+
+
+    subtotalDisplay.textContent =
+        `RM ${formatRM(jumlah)}`;
+
+
+    totalDisplay.textContent =
+        `RM ${formatRM(jumlah)}`;
+
+
+    mobileTotal.textContent =
+        `RM ${formatRM(jumlah)}`;
+
+
+    /* =====================================================
+       JUMLAH ITEM
+    ===================================================== */
+
+    const itemCount =
+        troli.reduce(
+            (total, item) =>
+                total +
+                Number(item.kuantiti || 0),
+            0
+        );
+
+
+    mobileCount.textContent =
+        `${num(itemCount)} item`;
+
+
+    /* =====================================================
+       BAYARAN
+    ===================================================== */
+
+    let bayaran = 0;
+
+
+    if (kaedah === 'TUNAI') {
+
+        bayaran =
+            Number(
+                bayaranInput.value ||
+                0
+            );
+
+    } else {
+
+        bayaran =
+            jumlah;
+
+    }
+
+
+    /* =====================================================
+       BAKI
+    ===================================================== */
+
+    const baki =
+        Math.max(
+            0,
+            bayaran - jumlah
+        );
+
+
+    bakiDisplay.textContent =
+        `RM ${formatRM(baki)}`;
+
+
+    /* =====================================================
+       ENABLE / DISABLE BAYAR
+    ===================================================== */
+
+    let bolehBayar =
+        troli.length > 0;
+
+
+    if (
+        kaedah === 'TUNAI' &&
+        bayaran < jumlah
+    ) {
+
+        bolehBayar = false;
+
+    }
+
+
+    btnBayar.disabled =
+        !bolehBayar;
+
+}
+
+
+/* =========================================================
+   KIRA JUMLAH TROLI
+========================================================= */
+
+function kiraTotal() {
+
+    return troli.reduce(
+        (jumlah, item) => {
+
+            return (
+                jumlah +
+                (
+                    Number(item.harga || 0) *
+                    Number(item.kuantiti || 0)
+                )
+            );
+
+        },
+        0
+    );
+
+}
+
+</script>
+
+<script>
+
+/* =========================================================
+   PROSES BAYAR SEKARANG
+========================================================= */
+
+async function bayarSekarang() {
+
+    /* =========================
+       SEMAK TROLI
+    ========================= */
+
+    if (!troli.length) {
+
+        showToast(
+            'error',
+            'Troli kosong',
+            'Sila pilih sekurang-kurangnya satu produk.'
+        );
+
+        return;
+    }
+
+
+    const subtotal = kiraTotal();
+
+    const diskaun = 0;
+
+    const cukai = 0;
+
+    const jumlah =
+        Math.max(
+            0,
+            subtotal - diskaun + cukai
+        );
+
+
+    /* =====================================================
+       BAYARAN
+    ===================================================== */
+
+    let bayaran = 0;
+
+
+    if (kaedah === 'TUNAI') {
+
+        bayaran =
+            Number(
+                bayaranInput.value || 0
+            );
+
+    } else {
+
+        bayaran = jumlah;
+
+    }
+
+
+    /* =====================================================
+       SEMAK BAYARAN TUNAI
+    ===================================================== */
+
+    if (
+        kaedah === 'TUNAI' &&
+        bayaran < jumlah
+    ) {
+
+        showToast(
+            'error',
+            'Bayaran tidak mencukupi',
+            `Jumlah perlu dibayar ialah RM ${formatRM(jumlah)}`
+        );
+
+        bayaranInput.focus();
+
+        return;
+    }
+
+
+    /* =====================================================
+       BAKI
+    ===================================================== */
+
+    const baki =
+        Math.max(
+            0,
+            bayaran - jumlah
+        );
+
+
+    /* =====================================================
+       MULAKAN PROSES
+    ===================================================== */
+
+    setLoading(
+        true,
+        'Memproses jualan...'
+    );
+
+
+    let jualanId = null;
+
+
+    try {
+
+        /* =================================================
+           1. AMBIL STOK TERKINI DARIPADA DATABASE
+        ================================================= */
+
+        const ids =
+            troli.map(
+                item => item.id
+            );
+
+
+        const {
+            data: produkSemasa,
+            error: produkError
+        } = await db
+            .from('sparepart')
+            .select(`
+                id,
+                kod_sparepart,
+                nama,
+                unit,
+                stok_semasa,
+                harga_jual,
+                status
+            `)
+            .in('id', ids);
+
+
+        if (produkError) {
+
+            throw produkError;
+
+        }
+
+
+        if (
+            !produkSemasa ||
+            produkSemasa.length !==
+            troli.length
+        ) {
+
+            throw new Error(
+                'Sebahagian produk tidak dijumpai dalam database.'
+            );
+
+        }
+
+
+        /* =================================================
+           2. SEMAK STOK SETIAP ITEM
+        ================================================= */
+
+        for (const item of troli) {
+
+            const p =
+                produkSemasa.find(
+                    x =>
+                        Number(x.id) ===
+                        Number(item.id)
+                );
+
+
+            if (!p) {
+
+                throw new Error(
+                    `Produk ${item.nama} tidak dijumpai.`
+                );
+
+            }
+
+
+            if (p.status === false) {
+
+                throw new Error(
+                    `${p.nama} sudah tidak aktif.`
+                );
+
+            }
+
+
+            const stokSemasa =
+                Number(
+                    p.stok_semasa || 0
+                );
+
+
+            const kuantiti =
+                Number(
+                    item.kuantiti || 0
+                );
+
+
+            if (
+                stokSemasa <
+                kuantiti
+            ) {
+
+                throw new Error(
+                    `Stok ${p.nama} tidak mencukupi. ` +
+                    `Stok semasa ${num(stokSemasa)} ${p.unit || 'PCS'}.`
+                );
+
+            }
+
+        }
+
+
+        /* =================================================
+           3. JANA NOMBOR JUALAN
+        ================================================= */
+
+        const noJualan =
+            janaNoJualan();
+
+
+        /* =================================================
+           4. INSERT JUALAN
+        ================================================= */
+
+        setLoading(
+            true,
+            'Menyimpan transaksi jualan...'
+        );
+
+
+        const {
+            data: jualan,
+            error: jualanError
+        } = await db
+            .from('jualan')
+            .insert({
+
+                no_jualan:
+                    noJualan,
+
+                subtotal:
+                    subtotal,
+
+                diskaun:
+                    diskaun,
+
+                cukai:
+                    cukai,
+
+                jumlah:
+                    jumlah,
+
+                bayaran:
+                    bayaran,
+
+                baki:
+                    baki,
+
+                kaedah_bayaran:
+                    kaedah,
+
+                status:
+                    'PAID'
+
+            })
+            .select(`
+                id,
+                no_jualan
+            `)
+            .single();
+
+
+        if (jualanError) {
+
+            throw jualanError;
+
+        }
+
+
+        if (!jualan) {
+
+            throw new Error(
+                'Rekod jualan tidak berjaya diwujudkan.'
+            );
+
+        }
+
+
+        jualanId =
+            jualan.id;
+
+
+        /* =================================================
+           5. SEDIAKAN JUALAN DETAIL
+        ================================================= */
+
+        const jualanDetail =
+            troli.map(item => {
+
+                const hargaSeunit =
+                    Number(
+                        item.harga || 0
+                    );
+
+
+                const kuantiti =
+                    Number(
+                        item.kuantiti || 0
+                    );
+
+
+                const diskaunItem =
+                    0;
+
+
+                const jumlahItem =
+                    Math.max(
+                        0,
+                        (
+                            hargaSeunit *
+                            kuantiti
+                        ) -
+                        diskaunItem
+                    );
+
+
+                return {
+
+                    jualan_id:
+                        jualan.id,
+
+                    sparepart_id:
+                        item.id,
+
+                    kod_sparepart:
+                        item.kod_sparepart,
+
+                    nama_sparepart:
+                        item.nama,
+
+                    kuantiti:
+                        kuantiti,
+
+                    harga_seunit:
+                        hargaSeunit,
+
+                    diskaun:
+                        diskaunItem,
+
+                    jumlah:
+                        jumlahItem
+
+                };
+
+            });
+
+
+        /* =================================================
+           6. INSERT JUALAN DETAIL
+        ================================================= */
+
+        setLoading(
+            true,
+            'Menyimpan item jualan...'
+        );
+
+
+        const {
+            error: detailError
+        } = await db
+            .from('jualan_detail')
+            .insert(
+                jualanDetail
+            );
+
+
+        if (detailError) {
+
+            throw detailError;
+
+        }
+
+
+        /* =================================================
+           7. TOLAK STOK SATU PERSATU
+        ================================================= */
+
+        setLoading(
+            true,
+            'Mengemaskini stok...'
+        );
+
+
+        for (const item of troli) {
+
+            const p =
+                produkSemasa.find(
+                    x =>
+                        Number(x.id) ===
+                        Number(item.id)
+                );
+
+
+            if (!p) {
+
+                throw new Error(
+                    `Produk ${item.nama} tidak dijumpai semasa proses stok.`
+                );
+
+            }
+
+
+            const stokSebelum =
+                Number(
+                    p.stok_semasa || 0
+                );
+
+
+            const kuantiti =
+                Number(
+                    item.kuantiti || 0
+                );
+
+
+            const stokSelepas =
+                stokSebelum -
+                kuantiti;
+
+
+            /* =============================================
+               SEMAK SEKALI LAGI
+            ============================================= */
+
+            if (stokSelepas < 0) {
+
+                throw new Error(
+                    `Stok ${p.nama} tidak mencukupi.`
+                );
+
+            }
+
+
+            /* =============================================
+               UPDATE SPAREPART
+            ============================================= */
+
+            const {
+                data: updatedProduk,
+                error: updateError
+            } = await db
+                .from('sparepart')
+                .update({
+
+                    stok_semasa:
+                        stokSelepas,
+
+                    updated_at:
+                        new Date()
+                            .toISOString()
+
+                })
+                .eq(
+                    'id',
+                    item.id
+                )
+                .eq(
+                    'stok_semasa',
+                    stokSebelum
+                )
+                .select(`
+                    id,
+                    stok_semasa
+                `);
+
+
+            if (updateError) {
+
+                throw updateError;
+
+            }
+
+
+            /*
+             * .eq('stok_semasa', stokSebelum)
+             * digunakan untuk mengurangkan risiko
+             * dua cashier menolak stok yang sama
+             * pada masa serentak.
+             */
+
+            if (
+                !updatedProduk ||
+                updatedProduk.length === 0
+            ) {
+
+                throw new Error(
+                    `Stok ${p.nama} telah berubah. ` +
+                    `Sila cuba semula transaksi.`
+                );
+
+            }
+
+
+            /* =============================================
+               8. REKOD STOK PERGERAKAN
+            ============================================= */
+
+            const {
+                error: pergerakanError
+            } = await db
+                .from('stok_pergerakan')
+                .insert({
+
+                    sparepart_id:
+                        item.id,
+
+                    jenis:
+                        'JUALAN',
+
+                    kuantiti:
+                        kuantiti,
+
+                    stok_sebelum:
+                        stokSebelum,
+
+                    stok_selepas:
+                        stokSelepas,
+
+                    rujukan:
+                        jualan.no_jualan,
+
+                    jualan_id:
+                        jualan.id,
+
+                    catatan:
+                        'Jualan melalui POS'
+
+                });
+
+
+            if (pergerakanError) {
+
+                throw pergerakanError;
+
+            }
+
+        }
+
+
+        /* =================================================
+           9. TRANSAKSI BERJAYA
+        ================================================= */
+
+        orderNumber.textContent =
+            `Order: ${jualan.no_jualan}`;
+
+
+        showToast(
+            'success',
+            'Bayaran berjaya',
+            `${jualan.no_jualan} · RM ${formatRM(jumlah)}`
+        );
+
+
+        /* =================================================
+           10. RESET TROLI
+        ================================================= */
+
+        troli = [];
+
+
+        bayaranInput.value = '';
+
+
+        /* =================================================
+           11. MUAT SEMULA PRODUK
+        ================================================= */
+
+        await muatProduk();
+
+
+        paparTroli();
+
+
+    } catch (error) {
+
+        console.error(
+            'RALAT TRANSAKSI POS:',
+            error
+        );
+
+
+        showToast(
+            'error',
+            'Transaksi gagal',
+            error.message ||
+            'Ralat tidak diketahui.'
+        );
+
+
+        /*
+         * PENTING:
+         *
+         * Versi browser ini menjalankan beberapa operasi
+         * database secara berasingan:
+         *
+         * 1. jualan
+         * 2. jualan_detail
+         * 3. update sparepart
+         * 4. stok_pergerakan
+         *
+         * Jika jualanId sudah ada tetapi proses selepasnya
+         * gagal, semak rekod tersebut.
+         *
+         * Untuk sistem production, proses ini lebih selamat
+         * dibuat menggunakan PostgreSQL Function / Supabase RPC
+         * supaya semuanya berada dalam SATU transaction.
+         */
+
+        if (jualanId) {
+
+            console.warn(
+                'AMARAN:',
+                'Rekod jualan telah diwujudkan.',
+                'jualan_id =',
+                jualanId
+            );
+
+        }
+
+
+    } finally {
+
+        setLoading(false);
+
+    }
+
+}
+
+
+/* =========================================================
+   JANA NO JUALAN
+========================================================= */
+
+function janaNoJualan() {
+
+    const now =
+        new Date();
+
+
+    const pad =
+        n =>
+            String(n)
+                .padStart(
+                    2,
+                    '0'
+                );
+
+
+    /*
+        Format:
+
+        J
+        YY
+        MM
+        DD
+        HH
+        MM
+        SS
+        XX
+
+        Contoh:
+        J26100815352245
+    */
+
+
+    const tahun =
+        String(
+            now.getFullYear()
+        ).slice(-2);
+
+
+    const bulan =
+        pad(
+            now.getMonth() + 1
+        );
+
+
+    const hari =
+        pad(
+            now.getDate()
+        );
+
+
+    const jam =
+        pad(
+            now.getHours()
+        );
+
+
+    const minit =
+        pad(
+            now.getMinutes()
+        );
+
+
+    const saat =
+        pad(
+            now.getSeconds()
+        );
+
+
+    const random =
+        String(
+            Math.floor(
+                Math.random() * 100
+            )
+        ).padStart(
+            2,
+            '0'
+        );
+
+
+    return (
+        'J' +
+        tahun +
+        bulan +
+        hari +
+        jam +
+        minit +
+        saat +
+        random
+    );
+
+}
+
+
+/* =========================================================
+   URL GAMBAR SUPABASE STORAGE
+========================================================= */
+
+function gambarUrl(path) {
+
+    if (!path) {
+
+        return '';
+
+    }
+
+
+    /*
+        Kalau image_path sudah URL penuh,
+        terus gunakan URL tersebut.
+    */
+
+    if (
+        /^https?:\/\//i.test(path)
+    ) {
+
+        return path;
+
+    }
+
+
+    /*
+        Kalau image_path hanya storage path,
+        bina public URL daripada bucket produk.
+    */
+
+    const {
+        data
+    } = db
+        .storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(path);
+
+
+    return (
+        data?.publicUrl ||
+        ''
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT RM
+========================================================= */
+
+function formatRM(value) {
+
+    return Number(
+        value || 0
+    ).toLocaleString(
+        'ms-MY',
+        {
+
+            minimumFractionDigits: 2,
+
+            maximumFractionDigits: 2
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT NUMBER
+========================================================= */
+
+function num(value) {
+
+    return Number(
+        value || 0
+    ).toLocaleString(
+        'ms-MY',
+        {
+
+            minimumFractionDigits: 0,
+
+            maximumFractionDigits: 2
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(value) {
+
+    return String(
+        value ?? ''
+    )
+
+    .replace(
+        /&/g,
+        '&amp;'
+    )
+
+    .replace(
+        /</g,
+        '&lt;'
+    )
+
+    .replace(
+        />/g,
+        '&gt;'
+    )
+
+    .replace(
+        /"/g,
+        '&quot;'
+    )
+
+    .replace(
+        /'/g,
+        '&#039;'
+    );
+
+}
+
+
+/* =========================================================
+   ESCAPE ATTRIBUTE
+========================================================= */
+
+function escapeAttribute(value) {
+
+    return escapeHtml(
+        value
+    );
+
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+function setLoading(
+    show,
+    text = 'Memproses...'
+) {
+
+    const loadingElement =
+        document.getElementById(
+            'loading'
+        );
+
+
+    const loadingTextElement =
+        document.getElementById(
+            'loadingText'
+        );
+
+
+    if (!loadingElement) {
+
+        return;
+
+    }
+
+
+    if (loadingTextElement) {
+
+        loadingTextElement.textContent =
+            text;
+
+    }
+
+
+    loadingElement.classList.toggle(
+        'show',
+        Boolean(show)
+    );
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function showToast(
+    type,
+    title,
+    message = ''
+) {
+
+    const toastElement =
+        document.getElementById(
+            'toast'
+        );
+
+
+    const titleElement =
+        document.getElementById(
+            'toastTitle'
+        );
+
+
+    const messageElement =
+        document.getElementById(
+            'toastMsg'
+        );
+
+
+    if (!toastElement) {
+
+        return;
+
+    }
+
+
+    toastElement.className =
+        `toast show ${type}`;
+
+
+    if (titleElement) {
+
+        titleElement.textContent =
+            title;
+
+    }
+
+
+    if (messageElement) {
+
+        messageElement.textContent =
+            message;
+
+    }
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            () => {
+
+                toastElement
+                    .classList
+                    .remove(
+                        'show'
+                    );
+
+            },
+            4500
+        );
+
+}
+
+
+/* =========================================================
+   PAPAR PENGGUNA
+========================================================= */
+
+function paparPengguna() {
+
+    try {
+
+        let user = null;
+
+
+        /* =========================
+           CURRENT USER
+        ========================= */
+
+        if (
+            window.currentUser
+        ) {
+
+            user =
+                window.currentUser;
+
+        }
+
+
+        /* =========================
+           MDP USER
+        ========================= */
+
+        if (!user) {
+
+            const saved =
+                localStorage.getItem(
+                    'mdp_user'
+                );
+
+
+            if (saved) {
+
+                user =
+                    JSON.parse(
+                        saved
+                    );
+
+            }
+
+        }
+
+
+        /* =========================
+           PENGGUNA
+        ========================= */
+
+        if (!user) {
+
+            const saved =
+                localStorage.getItem(
+                    'pengguna'
+                );
+
+
+            if (saved) {
+
+                user =
+                    JSON.parse(
+                        saved
+                    );
+
+            }
+
+        }
+
+
+        if (!user) {
+
+            return;
+
+        }
+
+
+        /* =========================
+           NAMA
+        ========================= */
+
+        const displayName =
+
+            user.name ||
+
+            user.nama ||
+
+            user.noSkb ||
+
+            user.username ||
+
+            'Pengguna';
+
+
+        /* =========================
+           ROLE
+        ========================= */
+
+        const displayRole =
+
+            user.jawatan ||
+
+            user.role ||
+
+            'Pengguna';
+
+
+        const userElement =
+            document.getElementById(
+                'topUser'
+            );
+
+
+        const roleElement =
+            document.getElementById(
+                'topRole'
+            );
+
+
+        if (userElement) {
+
+            userElement.textContent =
+                displayName;
+
+        }
+
+
+        if (roleElement) {
+
+            roleElement.textContent =
+                displayRole;
+
+        }
+
+
+    } catch (error) {
+
+        console.warn(
+            'Gagal membaca data pengguna:',
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   BARCODE / ENTER SEARCH
+
+   Kalau barcode scanner bertindak seperti keyboard,
+   scanner biasanya menaip kod kemudian hantar Enter.
+
+   Jika carian mempunyai SATU produk yang kodnya sepadan,
+   produk akan terus dimasukkan ke troli.
+========================================================= */
+
+searchInput.addEventListener(
+    'keydown',
+    function(event) {
+
+        if (
+            event.key !== 'Enter'
+        ) {
+
+            return;
+
+        }
+
+
+        event.preventDefault();
+
+
+        const value =
+            String(
+                searchInput.value || ''
+            )
+            .trim()
+            .toLowerCase();
+
+
+        if (!value) {
+
+            return;
+
+        }
+
+
+        const item =
+            produk.find(
+                x => {
+
+                    const kod =
+                        String(
+                            x.kod_sparepart || ''
+                        )
+                        .trim()
+                        .toLowerCase();
+
+
+                    const part =
+                        String(
+                            x.no_part || ''
+                        )
+                        .trim()
+                        .toLowerCase();
+
+
+                    return (
+                        kod === value ||
+                        part === value
+                    );
+
+                }
+            );
+
+
+        if (!item) {
+
+            showToast(
+                'error',
+                'Produk tidak dijumpai',
+                `Tiada produk untuk kod ${searchInput.value}`
+            );
+
+            return;
+
+        }
+
+
+        tambahTroli(
+            item.id
+        );
+
+
+        searchInput.value = '';
+
+
+        paparProduk();
+
+
+        searchInput.focus();
+
+    }
+);
+
+
+/* =========================================================
+   KEYBOARD SHORTCUT
+
+   F2     = fokus carian
+   F4     = bayar
+   Escape = kosongkan search
+========================================================= */
+
+document.addEventListener(
+    'keydown',
+    function(event) {
+
+        /* =========================
+           F2 - SEARCH
+        ========================= */
+
+        if (
+            event.key === 'F2'
+        ) {
+
+            event.preventDefault();
+
+            searchInput.focus();
+
+            searchInput.select();
+
+        }
+
+
+        /* =========================
+           F4 - BAYAR
+        ========================= */
+
+        if (
+            event.key === 'F4'
+        ) {
+
+            event.preventDefault();
+
+
+            if (
+                !btnBayar.disabled
+            ) {
+
+                bayarSekarang();
+
+            }
+
+        }
+
+
+        /* =========================
+           ESCAPE
+        ========================= */
+
+        if (
+            event.key === 'Escape'
+        ) {
+
+            searchInput.value = '';
+
+            kategoriAktif = '';
+
+
+            document
+                .querySelectorAll(
+                    '.cat'
+                )
+                .forEach(
+                    (btn, index) => {
+
+                        btn.classList.toggle(
+                            'active',
+                            index === 0
+                        );
+
+                    }
+                );
+
+
+            paparProduk();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   PAPAR TROLI PERTAMA KALI
+========================================================= */
+
+paparTroli();
+
+</script>
+
+
+<!-- =====================================================
+     FONT AWESOME
+===================================================== -->
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js">
+</script>
+
+
+<!-- =====================================================
+     SHARED SIDEBAR
+
+     Pastikan:
+     #sharedSidebar
+     #sharedMobileNav
+
+     sudah wujud sebelum sidebar.js dipanggil.
+===================================================== -->
+
+<script src="sidebar.js"></script>
+
+
+</body>
+</html>
+  
+
+  
