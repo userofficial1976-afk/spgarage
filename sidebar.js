@@ -73,11 +73,7 @@
 
             items: [
 
-                {
-                    href: 'stok-masuk.html',
-                    icon: 'fa-arrow-right-to-bracket',
-                    text: 'Stok Masuk'
-                },
+
 
                 {
                     href: 'pos.html',
