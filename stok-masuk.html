@@ -1,0 +1,1898 @@
+```html
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Stok Masuk — SP Garage</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<script src="supabase-config.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Inter, Arial, sans-serif;
+    background: #0b1220;
+    color: #e5e7eb;
+}
+
+.sidebar {
+    width: 280px;
+    background: rgba(15, 23, 42, .96);
+    border-right: 1px solid rgba(255,255,255,.08);
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+}
+
+.main {
+    margin-left: 280px;
+    min-height: 100vh;
+}
+
+.glass {
+    background: rgba(15,23,42,.72);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,.08);
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 12px 16px;
+    margin: 4px 12px;
+    border-radius: 10px;
+    color: #94a3b8;
+    text-decoration: none;
+    transition: .2s;
+}
+
+.nav-item:hover {
+    background: rgba(20,184,166,.10);
+    color: #5eead4;
+}
+
+.nav-item.active {
+    background: rgba(20,184,166,.16);
+    color: #5eead4;
+}
+
+.nav-item i {
+    width: 22px;
+    text-align: center;
+}
+
+.card {
+    background: rgba(15,23,42,.72);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(20,184,166,.14);
+    color: #2dd4bf;
+    font-size: 20px;
+}
+
+.input {
+    width: 100%;
+    background: #111827;
+    border: 1px solid #334155;
+    color: #e5e7eb;
+    border-radius: 9px;
+    padding: 11px 13px;
+    outline: none;
+}
+
+.input:focus {
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 2px rgba(20,184,166,.12);
+}
+
+.input::placeholder {
+    color: #64748b;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 7px;
+}
+
+.btn-primary {
+    background: #0d9488;
+    color: white;
+    border: none;
+    border-radius: 9px;
+    padding: 11px 18px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background: #0f766e;
+}
+
+.btn-primary:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: #1e293b;
+    color: #cbd5e1;
+    border: 1px solid #334155;
+    border-radius: 9px;
+    padding: 11px 18px;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: #334155;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 950px;
+}
+
+th {
+    background: #111827;
+    color: #94a3b8;
+    font-size: 12px;
+    text-align: left;
+    padding: 13px 12px;
+    border-bottom: 1px solid #334155;
+    white-space: nowrap;
+}
+
+td {
+    padding: 13px 12px;
+    border-bottom: 1px solid rgba(51,65,85,.55);
+    color: #dbe4ee;
+    font-size: 13px;
+}
+
+tr:hover td {
+    background: rgba(20,184,166,.035);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badge-green {
+    background: rgba(34,197,94,.12);
+    color: #4ade80;
+}
+
+.badge-red {
+    background: rgba(239,68,68,.12);
+    color: #f87171;
+}
+
+.badge-blue {
+    background: rgba(59,130,246,.12);
+    color: #60a5fa;
+}
+
+.modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.72);
+    z-index: 5000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-bg.show {
+    display: flex;
+}
+
+.modal {
+    width: 100%;
+    max-width: 700px;
+    max-height: 92vh;
+    overflow-y: auto;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 18px;
+    box-shadow: 0 25px 70px rgba(0,0,0,.5);
+}
+
+.product-option {
+    padding: 11px 13px;
+    border-bottom: 1px solid #1e293b;
+    cursor: pointer;
+}
+
+.product-option:hover {
+    background: rgba(20,184,166,.08);
+}
+
+.search-results {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 4px);
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    overflow: hidden;
+    z-index: 100;
+    max-height: 260px;
+    overflow-y: auto;
+    box-shadow: 0 15px 35px rgba(0,0,0,.4);
+}
+
+.selected-product {
+    border: 1px solid rgba(20,184,166,.35);
+    background: rgba(20,184,166,.07);
+    border-radius: 12px;
+    padding: 15px;
+}
+
+.toast {
+    position: fixed;
+    right: 25px;
+    bottom: 25px;
+    z-index: 99999;
+    min-width: 280px;
+    max-width: 450px;
+    padding: 14px 17px;
+    border-radius: 11px;
+    display: none;
+    box-shadow: 0 15px 40px rgba(0,0,0,.4);
+}
+
+.toast.show {
+    display: flex;
+}
+
+.toast-success {
+    background: #064e3b;
+    border: 1px solid #10b981;
+}
+
+.toast-error {
+    background: #450a0a;
+    border: 1px solid #ef4444;
+}
+
+.loading {
+    position: fixed;
+    inset: 0;
+    background: rgba(2,6,23,.78);
+    z-index: 99998;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading.show {
+    display: flex;
+}
+
+.spinner {
+    width: 42px;
+    height: 42px;
+    border: 4px solid #334155;
+    border-top-color: #2dd4bf;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.mobile-header {
+    display: none;
+}
+
+@media(max-width: 1023px) {
+    .sidebar {
+        display: none;
+    }
+
+    .main {
+        margin-left: 0;
+    }
+
+    .mobile-header {
+        display: flex;
+    }
+
+    .content {
+        padding-bottom: 90px !important;
+    }
+}
+
+.mobile-bottom {
+    display: none;
+}
+
+@media(max-width: 1023px) {
+    .mobile-bottom {
+        position: fixed;
+        display: flex;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 70px;
+        background: rgba(15,23,42,.98);
+        border-top: 1px solid #334155;
+        z-index: 99999;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    .mobile-bottom a {
+        color: #64748b;
+        text-decoration: none;
+        text-align: center;
+        font-size: 10px;
+    }
+
+    .mobile-bottom a.active {
+        color: #2dd4bf;
+    }
+
+    .mobile-bottom i {
+        display: block;
+        font-size: 18px;
+        margin-bottom: 4px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+
+    <div class="p-5 border-b border-slate-700/60">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-teal-500/15 flex items-center justify-center">
+                <i class="fa-solid fa-motorcycle text-teal-400 text-xl"></i>
+            </div>
+
+            <div>
+                <div class="font-bold text-white">SP GARAGE</div>
+                <div class="text-xs text-slate-500">Inventory & POS</div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="pt-4">
+
+        <a href="dashboard.html" class="nav-item">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <a href="produk.html" class="nav-item">
+            <i class="fa-solid fa-box"></i>
+            <span>Produk</span>
+        </a>
+
+        <a href="kategori.html" class="nav-item">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Kategori</span>
+        </a>
+
+        <a href="jenama.html" class="nav-item">
+            <i class="fa-solid fa-tags"></i>
+            <span>Jenama</span>
+        </a>
+
+        <a href="model-motosikal.html" class="nav-item">
+            <i class="fa-solid fa-motorcycle"></i>
+            <span>Model Motosikal</span>
+        </a>
+
+        <a href="stok-masuk.html" class="nav-item active">
+            <i class="fa-solid fa-truck-ramp-box"></i>
+            <span>Stok Masuk</span>
+        </a>
+
+        <a href="pos.html" class="nav-item">
+            <i class="fa-solid fa-cash-register"></i>
+            <span>POS / Cashier</span>
+        </a>
+
+        <a href="jualan.html" class="nav-item">
+            <i class="fa-solid fa-receipt"></i>
+            <span>Jualan</span>
+        </a>
+
+        <a href="laporan.html" class="nav-item">
+            <i class="fa-solid fa-file-lines"></i>
+            <span>Laporan</span>
+        </a>
+
+    </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+    <!-- MOBILE HEADER -->
+    <div class="mobile-header glass px-4 py-4 items-center justify-between sticky top-0 z-50">
+        <div>
+            <div class="font-bold text-white">SP GARAGE</div>
+            <div class="text-xs text-slate-500">Stok Masuk</div>
+        </div>
+
+        <div class="text-teal-400">
+            <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
+    </div>
+
+    <div class="content p-5 lg:p-7">
+
+        <!-- HEADER -->
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 mb-7">
+
+            <div>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-2xl lg:text-3xl font-bold text-white">
+                        Stok Masuk
+                    </h1>
+
+                    <span class="badge badge-green">
+                        <i class="fa-solid fa-circle text-[7px] mr-2"></i>
+                        System Online
+                    </span>
+                </div>
+
+                <p class="text-slate-400 text-sm mt-1">
+                    Rekod penerimaan stok spare part
+                </p>
+            </div>
+
+            <button onclick="bukaModalStokMasuk()" class="btn-primary">
+                <i class="fa-solid fa-plus mr-2"></i>
+                Stok Masuk Baru
+            </button>
+
+        </div>
+
+        <!-- STATS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-7">
+
+            <div class="card">
+                <div class="flex items-center gap-4">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                    </div>
+
+                    <div>
+                        <div class="text-xs text-slate-500">Transaksi Stok Masuk</div>
+                        <div id="statTransaksi" class="text-2xl font-bold text-white">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="flex items-center gap-4">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-cubes"></i>
+                    </div>
+
+                    <div>
+                        <div class="text-xs text-slate-500">Jumlah Unit Masuk</div>
+                        <div id="statKuantiti" class="text-2xl font-bold text-white">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="flex items-center gap-4">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-calendar-day"></i>
+                    </div>
+
+                    <div>
+                        <div class="text-xs text-slate-500">Hari Ini</div>
+                        <div id="statHariIni" class="text-2xl font-bold text-white">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="flex items-center gap-4">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-box-open"></i>
+                    </div>
+
+                    <div>
+                        <div class="text-xs text-slate-500">Produk Aktif</div>
+                        <div id="statProduk" class="text-2xl font-bold text-white">0</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FILTER -->
+        <div class="card mb-5">
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+
+                <div class="lg:col-span-2">
+                    <label>Carian</label>
+
+                    <div class="relative">
+                        <i class="fa-solid fa-search absolute left-3 top-3.5 text-slate-500"></i>
+
+                        <input
+                            id="carian"
+                            class="input pl-10"
+                            placeholder="Kod spare part atau nama produk..."
+                            oninput="paparSejarah()"
+                        >
+                    </div>
+                </div>
+
+                <div>
+                    <label>Tarikh Dari</label>
+                    <input type="date" id="tarikhDari" class="input" onchange="paparSejarah()">
+                </div>
+
+                <div>
+                    <label>Tarikh Hingga</label>
+                    <input type="date" id="tarikhHingga" class="input" onchange="paparSejarah()">
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- HISTORY -->
+        <div class="card">
+
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+
+                <div>
+                    <h2 class="font-bold text-white">
+                        Sejarah Stok Masuk
+                    </h2>
+
+                    <p class="text-xs text-slate-500 mt-1">
+                        Semua rekod penerimaan stok
+                    </p>
+                </div>
+
+                <button onclick="muatData()" class="btn-secondary text-sm">
+                    <i class="fa-solid fa-rotate mr-2"></i>
+                    Refresh
+                </button>
+
+            </div>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>BIL</th>
+                            <th>TARIKH</th>
+                            <th>KOD</th>
+                            <th>PRODUK</th>
+                            <th>KUANTITI</th>
+                            <th>STOK SEBELUM</th>
+                            <th>STOK SELEPAS</th>
+                            <th>HARGA KOS</th>
+                            <th>RUJUKAN</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tbodyStok">
+
+                        <tr>
+                            <td colspan="9" class="text-center py-10 text-slate-500">
+                                Memuatkan data...
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+</main>
+
+<!-- MOBILE BOTTOM -->
+<div class="mobile-bottom">
+
+    <a href="dashboard.html">
+        <i class="fa-solid fa-chart-pie"></i>
+        Dashboard
+    </a>
+
+    <a href="produk.html">
+        <i class="fa-solid fa-box"></i>
+        Produk
+    </a>
+
+    <a href="stok-masuk.html" class="active">
+        <i class="fa-solid fa-truck-ramp-box"></i>
+        Stok
+    </a>
+
+    <a href="pos.html">
+        <i class="fa-solid fa-cash-register"></i>
+        POS
+    </a>
+
+    <a href="jualan.html">
+        <i class="fa-solid fa-receipt"></i>
+        Jualan
+    </a>
+
+</div>
+
+<!-- MODAL -->
+<div id="modalBg" class="modal-bg">
+
+    <div class="modal">
+
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-700">
+
+            <div>
+                <h2 class="text-lg font-bold text-white">
+                    Stok Masuk Baru
+                </h2>
+
+                <p class="text-xs text-slate-500 mt-1">
+                    Tambah stok ke dalam inventori
+                </p>
+            </div>
+
+            <button onclick="tutupModal()" class="text-slate-500 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+        <div class="p-5">
+
+            <!-- PRODUCT SEARCH -->
+            <div class="mb-5">
+
+                <label>
+                    Produk / Spare Part <span class="text-red-400">*</span>
+                </label>
+
+                <div class="relative">
+
+                    <i class="fa-solid fa-search absolute left-3 top-3.5 text-slate-500"></i>
+
+                    <input
+                        id="cariProduk"
+                        class="input pl-10"
+                        autocomplete="off"
+                        placeholder="Taip kod atau nama produk..."
+                        oninput="cariProduk()"
+                    >
+
+                    <div id="hasilProduk" class="search-results hidden"></div>
+
+                </div>
+
+            </div>
+
+            <!-- SELECTED PRODUCT -->
+            <div id="produkDipilih" class="selected-product hidden mb-5">
+
+                <div class="flex justify-between gap-4">
+
+                    <div>
+
+                        <div id="pilihKod" class="text-teal-400 font-bold"></div>
+
+                        <div id="pilihNama" class="text-white font-medium mt-1"></div>
+
+                        <div class="text-xs text-slate-500 mt-2">
+                            Stok semasa:
+                            <span id="pilihStok" class="text-slate-300 font-semibold"></span>
+                        </div>
+
+                    </div>
+
+                    <button
+                        onclick="batalProduk()"
+                        class="text-slate-500 hover:text-red-400"
+                        title="Tukar produk">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+
+                </div>
+
+            </div>
+
+            <input type="hidden" id="sparepartId">
+
+            <!-- QUANTITY + COST -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+
+                <div>
+
+                    <label>
+                        Kuantiti Stok Masuk <span class="text-red-400">*</span>
+                    </label>
+
+                    <input
+                        type="number"
+                        id="kuantiti"
+                        class="input"
+                        min="0.01"
+                        step="0.01"
+                        placeholder="Contoh: 10"
+                    >
+
+                </div>
+
+                <div>
+
+                    <label>
+                        Harga Kos Seunit
+                    </label>
+
+                    <input
+                        type="number"
+                        id="hargaKos"
+                        class="input"
+                        min="0"
+                        step="0.01"
+                        placeholder="Contoh: 15.50"
+                    >
+
+                </div>
+
+            </div>
+
+            <!-- REFERENCE -->
+            <div class="mb-5">
+
+                <label>Rujukan / No. Invoice</label>
+
+                <input
+                    id="rujukan"
+                    class="input"
+                    maxlength="100"
+                    placeholder="Contoh: INV-2026-001"
+                >
+
+            </div>
+
+            <!-- NOTE -->
+            <div class="mb-6">
+
+                <label>Catatan</label>
+
+                <textarea
+                    id="catatan"
+                    class="input"
+                    rows="3"
+                    maxlength="500"
+                    placeholder="Catatan tambahan jika ada..."></textarea>
+
+            </div>
+
+            <!-- PREVIEW -->
+            <div id="previewStok"
+                 class="hidden rounded-xl border border-slate-700 bg-slate-900/70 p-4 mb-5">
+
+                <div class="text-xs text-slate-500 mb-3">
+                    Ringkasan stok
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 text-center">
+
+                    <div>
+                        <div class="text-xs text-slate-500">Sebelum</div>
+                        <div id="previewSebelum" class="font-bold text-white">0</div>
+                    </div>
+
+                    <div>
+                        <div class="text-xs text-slate-500">Masuk</div>
+                        <div id="previewMasuk" class="font-bold text-teal-400">0</div>
+                    </div>
+
+                    <div>
+                        <div class="text-xs text-slate-500">Selepas</div>
+                        <div id="previewSelepas" class="font-bold text-green-400">0</div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- BUTTON -->
+            <div class="flex justify-end gap-3">
+
+                <button onclick="tutupModal()" class="btn-secondary">
+                    Batal
+                </button>
+
+                <button
+                    id="btnSimpan"
+                    onclick="simpanStokMasuk()"
+                    class="btn-primary">
+
+                    <i class="fa-solid fa-floppy-disk mr-2"></i>
+                    Simpan Stok Masuk
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- LOADING -->
+<div id="loading" class="loading">
+
+    <div class="text-center">
+
+        <div class="spinner mx-auto mb-4"></div>
+
+        <div id="loadingText" class="text-sm text-slate-300">
+            Memproses...
+        </div>
+
+    </div>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast">
+
+    <i id="toastIcon" class="mr-3 mt-0.5"></i>
+
+    <div>
+        <div id="toastTitle" class="font-semibold text-sm"></div>
+        <div id="toastMessage" class="text-xs mt-1 opacity-80"></div>
+    </div>
+
+</div>
+
+<script>
+
+const db = window.supabaseClient;
+
+let semuaProduk = [];
+let semuaStok = [];
+let produkDipilihData = null;
+
+
+/* =========================================================
+   INIT
+========================================================= */
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+    if (!db) {
+        toast(
+            'Ralat',
+            'Supabase client tidak wujud.',
+            false
+        );
+        return;
+    }
+
+    setTarikhDefault();
+
+    await muatData();
+
+    document.getElementById('kuantiti')
+        .addEventListener('input', kemaskiniPreview);
+
+    document.getElementById('hargaKos')
+        .addEventListener('input', kemaskiniPreview);
+
+    document.getElementById('modalBg')
+        .addEventListener('click', function(e) {
+            if (e.target === this) {
+                tutupModal();
+            }
+        });
+
+});
+
+
+/* =========================================================
+   TARIKH
+========================================================= */
+
+function setTarikhDefault() {
+
+    const hariIni = new Date();
+
+    const yyyy = hariIni.getFullYear();
+
+    const mm = String(hariIni.getMonth() + 1).padStart(2, '0');
+
+    const dd = String(hariIni.getDate()).padStart(2, '0');
+
+    const tarikh = `${yyyy}-${mm}-${dd}`;
+
+    document.getElementById('tarikhDari').value = tarikh;
+
+    document.getElementById('tarikhHingga').value = tarikh;
+
+}
+
+
+/* =========================================================
+   LOAD DATA
+========================================================= */
+
+async function muatData() {
+
+    showLoading('Memuatkan data...');
+
+    try {
+
+        const [
+            produkResult,
+            stokResult
+        ] = await Promise.all([
+
+            db
+                .from('sparepart')
+                .select(`
+                    id,
+                    kod_sparepart,
+                    nama,
+                    stok_semasa,
+                    harga_kos,
+                    status
+                `)
+                .order('nama', { ascending: true }),
+
+            db
+                .from('stok_pergerakan')
+                .select(`
+                    id,
+                    sparepart_id,
+                    jenis,
+                    kuantiti,
+                    stok_sebelum,
+                    stok_selepas,
+                    rujukan,
+                    catatan,
+                    created_at,
+                    sparepart (
+                        kod_sparepart,
+                        nama,
+                        harga_kos
+                    )
+                `)
+                .eq('jenis', 'STOK_MASUK')
+                .order('created_at', { ascending: false })
+                .limit(1000)
+
+        ]);
+
+        if (produkResult.error) {
+            throw produkResult.error;
+        }
+
+        if (stokResult.error) {
+            throw stokResult.error;
+        }
+
+        semuaProduk = produkResult.data || [];
+
+        semuaStok = stokResult.data || [];
+
+        document.getElementById('statProduk').textContent =
+            semuaProduk.filter(x => x.status === true).length;
+
+        paparSejarah();
+
+        kemaskiniStatistik();
+
+    } catch (error) {
+
+        console.error('RALAT MUAT DATA:', error);
+
+        toast(
+            'Gagal memuatkan data',
+            error.message || 'Ralat tidak diketahui.',
+            false
+        );
+
+    } finally {
+
+        hideLoading();
+
+    }
+
+}
+
+
+/* =========================================================
+   STATISTIK
+========================================================= */
+
+function kemaskiniStatistik() {
+
+    const jumlahTransaksi = semuaStok.length;
+
+    const jumlahKuantiti = semuaStok.reduce(
+        (total, item) => total + Number(item.kuantiti || 0),
+        0
+    );
+
+    const hariIni = new Date().toDateString();
+
+    const jumlahHariIni = semuaStok.filter(item => {
+
+        return new Date(item.created_at).toDateString() === hariIni;
+
+    }).length;
+
+    document.getElementById('statTransaksi').textContent =
+        jumlahTransaksi.toLocaleString('ms-MY');
+
+    document.getElementById('statKuantiti').textContent =
+        formatNumber(jumlahKuantiti);
+
+    document.getElementById('statHariIni').textContent =
+        jumlahHariIni.toLocaleString('ms-MY');
+
+}
+
+
+/* =========================================================
+   CARIAN SEJARAH
+========================================================= */
+
+function paparSejarah() {
+
+    const tbody = document.getElementById('tbodyStok');
+
+    const carian = (
+        document.getElementById('carian').value || ''
+    ).trim().toLowerCase();
+
+    const dari =
+        document.getElementById('tarikhDari').value;
+
+    const hingga =
+        document.getElementById('tarikhHingga').value;
+
+    let data = [...semuaStok];
+
+    if (carian) {
+
+        data = data.filter(item => {
+
+            const kod =
+                item.sparepart?.kod_sparepart || '';
+
+            const nama =
+                item.sparepart?.nama || '';
+
+            const rujukan =
+                item.rujukan || '';
+
+            return (
+                kod.toLowerCase().includes(carian) ||
+                nama.toLowerCase().includes(carian) ||
+                rujukan.toLowerCase().includes(carian)
+            );
+
+        });
+
+    }
+
+    if (dari) {
+
+        data = data.filter(item => {
+
+            const tarikh =
+                new Date(item.created_at);
+
+            const mula =
+                new Date(dari + 'T00:00:00');
+
+            return tarikh >= mula;
+
+        });
+
+    }
+
+    if (hingga) {
+
+        data = data.filter(item => {
+
+            const tarikh =
+                new Date(item.created_at);
+
+            const tamat =
+                new Date(hingga + 'T23:59:59');
+
+            return tarikh <= tamat;
+
+        });
+
+    }
+
+    if (!data.length) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9"
+                    class="text-center py-12 text-slate-500">
+
+                    <i class="fa-solid fa-box-open text-3xl mb-3 block"></i>
+
+                    Tiada rekod stok masuk.
+
+                </td>
+            </tr>
+        `;
+
+        return;
+
+    }
+
+    tbody.innerHTML = data.map((item, index) => {
+
+        const tarikh =
+            formatTarikh(item.created_at);
+
+        const kod =
+            escapeHtml(item.sparepart?.kod_sparepart || '-');
+
+        const nama =
+            escapeHtml(item.sparepart?.nama || '-');
+
+        const hargaKos =
+            Number(item.sparepart?.harga_kos || 0);
+
+        return `
+            <tr>
+
+                <td>${index + 1}</td>
+
+                <td>
+                    <div class="text-white">${tarikh.date}</div>
+                    <div class="text-xs text-slate-500">
+                        ${tarikh.time}
+                    </div>
+                </td>
+
+                <td>
+                    <span class="badge badge-blue">
+                        ${kod}
+                    </span>
+                </td>
+
+                <td>
+                    <div class="font-medium text-white">
+                        ${nama}
+                    </div>
+                </td>
+
+                <td>
+                    <span class="text-teal-400 font-bold">
+                        +${formatNumber(item.kuantiti)}
+                    </span>
+                </td>
+
+                <td>
+                    ${formatNumber(item.stok_sebelum)}
+                </td>
+
+                <td>
+                    <span class="text-green-400 font-bold">
+                        ${formatNumber(item.stok_selepas)}
+                    </span>
+                </td>
+
+                <td>
+                    RM ${formatRM(hargaKos)}
+                </td>
+
+                <td>
+                    ${
+                        item.rujukan
+                        ? `<span class="text-slate-300">
+                             ${escapeHtml(item.rujukan)}
+                           </span>`
+                        : `<span class="text-slate-600">-</span>`
+                    }
+                </td>
+
+            </tr>
+        `;
+
+    }).join('');
+
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function bukaModalStokMasuk() {
+
+    resetForm();
+
+    document.getElementById('modalBg')
+        .classList.add('show');
+
+    setTimeout(() => {
+
+        document.getElementById('cariProduk').focus();
+
+    }, 100);
+
+}
+
+
+function tutupModal() {
+
+    document.getElementById('modalBg')
+        .classList.remove('show');
+
+}
+
+
+/* =========================================================
+   RESET FORM
+========================================================= */
+
+function resetForm() {
+
+    produkDipilihData = null;
+
+    document.getElementById('sparepartId').value = '';
+
+    document.getElementById('cariProduk').value = '';
+
+    document.getElementById('kuantiti').value = '';
+
+    document.getElementById('hargaKos').value = '';
+
+    document.getElementById('rujukan').value = '';
+
+    document.getElementById('catatan').value = '';
+
+    document.getElementById('hasilProduk').innerHTML = '';
+
+    document.getElementById('hasilProduk')
+        .classList.add('hidden');
+
+    document.getElementById('produkDipilih')
+        .classList.add('hidden');
+
+    document.getElementById('previewStok')
+        .classList.add('hidden');
+
+}
+
+
+/* =========================================================
+   CARI PRODUK
+========================================================= */
+
+function cariProduk() {
+
+    const input =
+        document.getElementById('cariProduk');
+
+    const keyword =
+        input.value.trim().toLowerCase();
+
+    const hasil =
+        document.getElementById('hasilProduk');
+
+    if (!keyword) {
+
+        hasil.innerHTML = '';
+
+        hasil.classList.add('hidden');
+
+        return;
+
+    }
+
+    const data = semuaProduk
+        .filter(item => item.status === true)
+        .filter(item => {
+
+            const kod =
+                (item.kod_sparepart || '').toLowerCase();
+
+            const nama =
+                (item.nama || '').toLowerCase();
+
+            return (
+                kod.includes(keyword) ||
+                nama.includes(keyword)
+            );
+
+        })
+        .slice(0, 30);
+
+    if (!data.length) {
+
+        hasil.innerHTML = `
+            <div class="p-4 text-sm text-slate-500 text-center">
+                Produk tidak dijumpai.
+            </div>
+        `;
+
+        hasil.classList.remove('hidden');
+
+        return;
+
+    }
+
+    hasil.innerHTML = data.map(item => {
+
+        return `
+            <div
+                class="product-option"
+                onclick="pilihProduk(${item.id})">
+
+                <div class="flex justify-between gap-3">
+
+                    <div>
+                        <div class="text-teal-400 font-semibold text-sm">
+                            ${escapeHtml(item.kod_sparepart)}
+                        </div>
+
+                        <div class="text-white text-sm mt-1">
+                            ${escapeHtml(item.nama)}
+                        </div>
+                    </div>
+
+                    <div class="text-right">
+
+                        <div class="text-xs text-slate-500">
+                            Stok
+                        </div>
+
+                        <div class="font-bold ${
+                            Number(item.stok_semasa) <= 0
+                                ? 'text-red-400'
+                                : 'text-green-400'
+                        }">
+                            ${formatNumber(item.stok_semasa)}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        `;
+
+    }).join('');
+
+    hasil.classList.remove('hidden');
+
+}
+
+
+/* =========================================================
+   PILIH PRODUK
+========================================================= */
+
+function pilihProduk(id) {
+
+    const produk =
+        semuaProduk.find(item => Number(item.id) === Number(id));
+
+    if (!produk) {
+
+        toast(
+            'Ralat',
+            'Produk tidak dijumpai.',
+            false
+        );
+
+        return;
+
+    }
+
+    produkDipilihData = produk;
+
+    document.getElementById('sparepartId').value =
+        produk.id;
+
+    document.getElementById('cariProduk').value =
+        produk.kod_sparepart;
+
+    document.getElementById('pilihKod').textContent =
+        produk.kod_sparepart;
+
+    document.getElementById('pilihNama').textContent =
+        produk.nama;
+
+    document.getElementById('pilihStok').textContent =
+        formatNumber(produk.stok_semasa);
+
+    document.getElementById('hargaKos').value =
+        Number(produk.harga_kos || 0).toFixed(2);
+
+    document.getElementById('hasilProduk')
+        .classList.add('hidden');
+
+    document.getElementById('produkDipilih')
+        .classList.remove('hidden');
+
+    kemaskiniPreview();
+
+    document.getElementById('kuantiti').focus();
+
+}
+
+
+/* =========================================================
+   BATAL PRODUK
+========================================================= */
+
+function batalProduk() {
+
+    produkDipilihData = null;
+
+    document.getElementById('sparepartId').value = '';
+
+    document.getElementById('cariProduk').value = '';
+
+    document.getElementById('produkDipilih')
+        .classList.add('hidden');
+
+    document.getElementById('previewStok')
+        .classList.add('hidden');
+
+    document.getElementById('cariProduk').focus();
+
+}
+
+
+/* =========================================================
+   PREVIEW
+========================================================= */
+
+function kemaskiniPreview() {
+
+    if (!produkDipilihData) {
+
+        document.getElementById('previewStok')
+            .classList.add('hidden');
+
+        return;
+
+    }
+
+    const sebelum =
+        Number(produkDipilihData.stok_semasa || 0);
+
+    const masuk =
+        Number(document.getElementById('kuantiti').value || 0);
+
+    const selepas =
+        sebelum + masuk;
+
+    document.getElementById('previewSebelum').textContent =
+        formatNumber(sebelum);
+
+    document.getElementById('previewMasuk').textContent =
+        formatNumber(masuk);
+
+    document.getElementById('previewSelepas').textContent =
+        formatNumber(selepas);
+
+    document.getElementById('previewStok')
+        .classList.remove('hidden');
+
+}
+
+
+/* =========================================================
+   SIMPAN STOK MASUK
+========================================================= */
+
+async function simpanStokMasuk() {
+
+    if (!produkDipilihData) {
+
+        toast(
+            'Produk diperlukan',
+            'Sila pilih produk terlebih dahulu.',
+            false
+        );
+
+        document.getElementById('cariProduk').focus();
+
+        return;
+
+    }
+
+    const kuantiti =
+        Number(document.getElementById('kuantiti').value);
+
+    const hargaKosValue =
+        document.getElementById('hargaKos').value.trim();
+
+    const hargaKos =
+        hargaKosValue === ''
+            ? null
+            : Number(hargaKosValue);
+
+    const rujukan =
+        document.getElementById('rujukan').value.trim();
+
+    const catatan =
+        document.getElementById('catatan').value.trim();
+
+
+    if (!Number.isFinite(kuantiti) || kuantiti <= 0) {
+
+        toast(
+            'Kuantiti tidak sah',
+            'Masukkan kuantiti stok lebih daripada 0.',
+            false
+        );
+
+        document.getElementById('kuantiti').focus();
+
+        return;
+
+    }
+
+
+    if (
+        hargaKos !== null &&
+        (!Number.isFinite(hargaKos) || hargaKos < 0)
+    ) {
+
+        toast(
+            'Harga kos tidak sah',
+            'Sila masukkan harga kos yang betul.',
+            false
+        );
+
+        document.getElementById('hargaKos').focus();
+
+        return;
+
+    }
+
+
+    const btn =
+        document.getElementById('btnSimpan');
+
+    btn.disabled = true;
+
+    showLoading('Menyimpan stok masuk...');
+
+    try {
+
+        const { data, error } = await db.rpc(
+            'tambah_stok_masuk',
+            {
+                p_sparepart_id:
+                    Number(produkDipilihData.id),
+
+                p_kuantiti:
+                    kuantiti,
+
+                p_harga_kos:
+                    hargaKos,
+
+                p_rujukan:
+                    rujukan || null,
+
+                p_catatan:
+                    catatan || null
+            }
+        );
+
+        if (error) {
+            throw error;
+        }
+
+
+        console.log('STOK MASUK BERJAYA:', data);
+
+
+        toast(
+            'Stok berjaya ditambah',
+            `${produkDipilihData.kod_sparepart} — +${formatNumber(kuantiti)} unit`,
+            true
+        );
+
+
+        tutupModal();
+
+        await muatData();
+
+
+    } catch (error) {
+
+        console.error('RALAT SIMPAN STOK:', error);
+
+        toast(
+            'Gagal simpan stok',
+            error.message || 'Ralat tidak diketahui.',
+            false
+        );
+
+    } finally {
+
+        btn.disabled = false;
+
+        hideLoading();
+
+    }
+
+}
+
+
+/* =========================================================
+   FORMAT
+========================================================= */
+
+function formatNumber(value) {
+
+    const number = Number(value || 0);
+
+    return number.toLocaleString(
+        'ms-MY',
+        {
+            minimumFractionDigits:
+                Number.isInteger(number) ? 0 : 2,
+
+            maximumFractionDigits: 2
+        }
+    );
+
+}
+
+
+function formatRM(value) {
+
+    return Number(value || 0).toLocaleString(
+        'ms-MY',
+        {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }
+    );
+
+}
+
+
+function formatTarikh(value) {
+
+    const d = new Date(value);
+
+    return {
+        date: d.toLocaleDateString(
+            'ms-MY',
+            {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            }
+        ),
+
+        time: d.toLocaleTimeString(
+            'ms-MY',
+            {
+                hour: '2-digit',
+                minute: '2-digit'
+            }
+        )
+    };
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(value) {
+
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+function showLoading(text = 'Memproses...') {
+
+    document.getElementById('loadingText')
+        .textContent = text;
+
+    document.getElementById('loading')
+        .classList.add('show');
+
+}
+
+
+function hideLoading() {
+
+    document.getElementById('loading')
+        .classList.remove('show');
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function toast(title, message, success = true) {
+
+    const box =
+        document.getElementById('toast');
+
+    const icon =
+        document.getElementById('toastIcon');
+
+    document.getElementById('toastTitle')
+        .textContent = title;
+
+    document.getElementById('toastMessage')
+        .textContent = message;
+
+    box.className =
+        'toast show ' +
+        (success
+            ? 'toast-success'
+            : 'toast-error');
+
+    icon.className =
+        success
+            ? 'fa-solid fa-circle-check mr-3 mt-0.5 text-green-400'
+            : 'fa-solid fa-circle-exclamation mr-3 mt-0.5 text-red-400';
+
+    clearTimeout(window.toastTimer);
+
+    window.toastTimer = setTimeout(() => {
+
+        box.classList.remove('show');
+
+    }, 4000);
+
+}
+
+
+/* =========================================================
+   ESCAPE / KEYBOARD
+========================================================= */
+
+document.addEventListener('keydown', function(e) {
+
+    if (e.key === 'Escape') {
+
+        tutupModal();
+
+    }
+
+});
+
+
+/* =========================================================
+   CLICK OUTSIDE PRODUCT SEARCH
+========================================================= */
+
+document.addEventListener('click', function(e) {
+
+    const input =
+        document.getElementById('cariProduk');
+
+    const hasil =
+        document.getElementById('hasilProduk');
+
+    if (!input || !hasil) return;
+
+    if (
+        !input.contains(e.target) &&
+        !hasil.contains(e.target)
+    ) {
+
+        hasil.classList.add('hidden');
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
+```
+
+### Cara guna
+
+1. Jalankan **SQL function** di Supabase dahulu.
+2. Simpan HTML di repository sebagai:
+   **`stok-masuk.html`**
+3. Pastikan `supabase-config.js` berada di lokasi yang sama seperti `produk.html`.
+4. Buka:
+   **`stok-masuk.html`**
+5. Klik **Stok Masuk Baru**.
+6. Cari produk.
+7. Pilih produk.
+8. Masukkan kuantiti.
+9. Harga kos akan mengambil harga kos sedia ada secara automatik, tetapi boleh diubah.
+10. Masukkan nombor invoice jika ada.
+11. Klik **Simpan Stok Masuk**.
+
+Apabila berjaya, contohnya stok asal **10**, masuk **5**:
+
+**Stok sebelum:** 10
+**Stok masuk:** +5
+**Stok selepas:** 15
+
+Dan Supabase akan menyimpan rekod:
+
+`stok_pergerakan → STOK_MASUK → 5 → 10 → 15`
+
+Jadi modul ini sudah menjadi asas yang betul untuk kita sambungkan kemudian dengan **POS/Cashier**, di mana setiap jualan akan automatik menolak `stok_semasa`.
