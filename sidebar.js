@@ -161,29 +161,19 @@
        ESCAPE HTML
     ===================================================== */
 
-    function escapeHtml(value) {
+  function escapeHtml(value) {
 
-        if (
-            value === null ||
-            value === undefined
-        ) {
-            return '';
-        }
-
-
-        return String(value)
-
-            .replace(/&/g, '&amp;')
-
-            .replace(/</g, '&lt;')
-
-            .replace(/>/g, '&gt;')
-
-            .replace(/"/g, '&quot;')
-
-            .replace(/'/g, '&#039;');
-
+    if (value === null || value === undefined) {
+        return '';
     }
+
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
 
 
     function escapeAttribute(value) {
@@ -874,30 +864,32 @@
             `;
 
 
-            section.items.forEach(item => {
+section.items.forEach(item => {
 
-                const active =
-                    isActivePage(item.href);
+    const active =
+        isActivePage(item.href);
 
+    html += `
 
-                html += `
+        "
+            class="sidebar-nav-item${active ? ' active' : ''}"
+            ${active ? 'aria-current="page"' : ''}
+        >
 
-                    ${escapeAttribute(item.href)}
+            <i
+                class="fa-solid ${escapeAttribute(item.icon)}"
+                aria-hidden="true"
+            ></i>
 
-                        <i
-                            class="fa-solid ${escapeAttribute(item.icon)}"
-                            aria-hidden="true"
-                        ></i>
+            <span>
+                ${escapeHtml(item.text)}
+            </span>
 
-                        <span>
-                            ${escapeHtml(item.text)}
-                        </span>
+        </a>
 
-                    </a>
+    `;
 
-                `;
-
-            });
+});
 
         });
 
