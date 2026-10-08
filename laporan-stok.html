@@ -31,94 +31,7 @@ body {
     color: #e5e7eb;
 }
 
-.sidebar {
-    width: 288px;
-    background: rgba(15,23,42,.96);
-    border-right: 1px solid rgba(148,163,184,.12);
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    z-index: 1000;
-    overflow-y: auto;
-}
 
-.sidebar-logo {
-    padding: 24px 22px;
-    border-bottom: 1px solid rgba(148,163,184,.1);
-}
-
-.logo-box {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.logo-icon {
-    width: 45px;
-    height: 45px;
-    border-radius: 13px;
-    background: linear-gradient(135deg,#2dd4bf,#0f766e);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 21px;
-}
-
-.logo-title {
-    font-weight: 800;
-    font-size: 17px;
-    color: white;
-}
-
-.logo-subtitle {
-    font-size: 11px;
-    color: #94a3b8;
-    margin-top: 2px;
-}
-
-.menu {
-    padding: 18px 12px;
-}
-
-.menu-title {
-    font-size: 10px;
-    font-weight: 700;
-    color: #64748b;
-    letter-spacing: 1.2px;
-    padding: 10px 12px;
-    text-transform: uppercase;
-}
-
-.menu a {
-    display: flex;
-    align-items: center;
-    gap: 13px;
-    padding: 12px 14px;
-    margin: 3px 0;
-    border-radius: 10px;
-    color: #94a3b8;
-    text-decoration: none;
-    font-size: 14px;
-    transition: .2s;
-}
-
-.menu a:hover {
-    background: rgba(45,212,191,.08);
-    color: #5eead4;
-}
-
-.menu a.active {
-    background: rgba(20,184,166,.15);
-    color: #5eead4;
-    border: 1px solid rgba(45,212,191,.12);
-}
-
-.menu a i {
-    width: 19px;
-    text-align: center;
-}
 
 .main {
     margin-left: 288px;
@@ -502,9 +415,7 @@ tbody tr:hover {
     border-color: rgba(239,68,68,.4);
 }
 
-.mobile-nav {
-    display: none;
-}
+
 
 @media(max-width:1100px) {
     .stats {
@@ -518,9 +429,7 @@ tbody tr:hover {
 
 @media(max-width:800px) {
 
-    .sidebar {
-        display: none;
-    }
+
 
     .main {
         margin-left: 0;
@@ -556,38 +465,6 @@ tbody tr:hover {
         grid-template-columns: 1fr;
     }
 
-    .mobile-nav {
-        display: flex;
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: 68px;
-        background: rgba(15,23,42,.98);
-        border-top: 1px solid #334155;
-        z-index: 99999;
-        justify-content: space-around;
-        align-items: center;
-    }
-
-    .mobile-nav a {
-        color: #64748b;
-        text-decoration: none;
-        font-size: 10px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 5px;
-    }
-
-    .mobile-nav a.active {
-        color: #2dd4bf;
-    }
-
-    .mobile-nav i {
-        font-size: 17px;
-    }
-
 }
 
 @media print {
@@ -597,14 +474,16 @@ tbody tr:hover {
         color: black !important;
     }
 
-    .sidebar,
-    .mobile-nav,
-    .topbar .user-box,
-    .filters,
-    .action-buttons,
-    .no-print {
-        display: none !important;
-    }
+#sharedSidebar,
+#sharedMobileNav,
+.sidebar,
+.mobile-nav,
+.topbar .user-box,
+.filters,
+.action-buttons,
+.no-print {
+    display: none !important;
+}
 
     .main {
         margin-left: 0;
@@ -655,101 +534,7 @@ tbody tr:hover {
 
 <body>
 
-<!-- =========================================================
-     SIDEBAR
-========================================================= -->
-
-<aside class="sidebar">
-
-    <div class="sidebar-logo">
-
-        <div class="logo-box">
-
-            <div class="logo-icon">
-                <i class="fa-solid fa-motorcycle"></i>
-            </div>
-
-            <div>
-                <div class="logo-title">
-                    Inventori & POS
-                </div>
-
-                <div class="logo-subtitle">
-                    Sparepart Motosikal
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-
-    <nav class="menu">
-
-        <div class="menu-title">
-            Utama
-        </div>
-
-        <a href="dashboard.html">
-            <i class="fa-solid fa-gauge-high"></i>
-            <span>Dashboard</span>
-        </a>
-
-        <a href="produk.html">
-            <i class="fa-solid fa-boxes-stacked"></i>
-            <span>Produk / Sparepart</span>
-        </a>
-
-        <a href="kategori.html">
-            <i class="fa-solid fa-layer-group"></i>
-            <span>Kategori</span>
-        </a>
-
-        <a href="jenama.html">
-            <i class="fa-solid fa-tags"></i>
-            <span>Jenama</span>
-        </a>
-
-        <a href="model-motosikal.html">
-            <i class="fa-solid fa-motorcycle"></i>
-            <span>Model Motosikal</span>
-        </a>
-
-        <div class="menu-title">
-            Transaksi
-        </div>
-
-        <a href="stok-masuk.html">
-            <i class="fa-solid fa-arrow-right-to-bracket"></i>
-            <span>Stok Masuk</span>
-        </a>
-
-        <a href="pos.html">
-            <i class="fa-solid fa-cash-register"></i>
-            <span>POS / Cahier</span>
-        </a>
-
-        <a href="jualan.html">
-            <i class="fa-solid fa-receipt"></i>
-            <span>Senarai Jualan</span>
-        </a>
-
-        <div class="menu-title">
-            Laporan
-        </div>
-
-        <a href="laporan-stok.html" class="active">
-            <i class="fa-solid fa-chart-column"></i>
-            <span>Laporan Stok</span>
-        </a>
-
-        <a href="laporan-jualan.html">
-            <i class="fa-solid fa-chart-line"></i>
-            <span>Laporan Jualan</span>
-        </a>
-
-    </nav>
-
-</aside>
+<div id="sharedSidebar"></div>
 
 
 <!-- =========================================================
@@ -1363,34 +1148,7 @@ tbody tr:hover {
      MOBILE NAV
 ========================================================= -->
 
-<nav class="mobile-nav">
-
-    <a href="dashboard.html">
-        <i class="fa-solid fa-gauge-high"></i>
-        <span>Dashboard</span>
-    </a>
-
-    <a href="produk.html">
-        <i class="fa-solid fa-boxes-stacked"></i>
-        <span>Produk</span>
-    </a>
-
-    <a href="pos.html">
-        <i class="fa-solid fa-cash-register"></i>
-        <span>POS</span>
-    </a>
-
-    <a href="laporan-stok.html" class="active">
-        <i class="fa-solid fa-chart-column"></i>
-        <span>Stok</span>
-    </a>
-
-    <a href="jualan.html">
-        <i class="fa-solid fa-receipt"></i>
-        <span>Jualan</span>
-    </a>
-
-</nav>
+<div id="sharedMobileNav"></div>
 
 
 <div class="toast-container" id="toastContainer"></div>
@@ -2798,6 +2556,7 @@ document.addEventListener(
 );
 
 </script>
-
+<script src="sidebar.js"></script>
+      
 </body>
 </html>
