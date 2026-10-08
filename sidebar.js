@@ -119,7 +119,7 @@
 
 
     /* =====================================================
-       MOBILE MENU
+       MOBILE NAV
     ===================================================== */
 
     const menuMobile = [
@@ -161,20 +161,30 @@
        ESCAPE HTML
     ===================================================== */
 
-  function escapeHtml(value) {
+    function escapeHtml(value) {
 
-    if (value === null || value === undefined) {
-        return '';
+        if (
+            value === null ||
+            value === undefined
+        ) {
+
+            return '';
+
+        }
+
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+
     }
 
-    return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
 
+    /* =====================================================
+       ESCAPE ATTRIBUTE
+    ===================================================== */
 
     function escapeAttribute(value) {
 
@@ -195,7 +205,6 @@
                 .split('#')[0]
                 .toLowerCase();
 
-
         return currentPage === target;
 
     }
@@ -212,7 +221,9 @@
                 'shared-navigation-style'
             )
         ) {
+
             return;
+
         }
 
 
@@ -241,6 +252,7 @@
 ========================================================= */
 
 #sharedSidebar .sidebar {
+
     position: fixed;
 
     top: 0;
@@ -282,9 +294,11 @@
 ========================================================= */
 
 #sharedSidebar .sidebar-logo {
+
     flex-shrink: 0;
 
-    padding: 22px 18px 18px;
+    padding:
+        22px 18px 18px;
 
     border-bottom:
         1px solid rgba(148,163,184,.08);
@@ -292,6 +306,7 @@
 
 
 #sharedSidebar .logo-box {
+
     display: flex;
 
     align-items: center;
@@ -301,6 +316,7 @@
 
 
 #sharedSidebar .logo-icon {
+
     width: 46px;
     height: 46px;
 
@@ -335,6 +351,7 @@
 
 
 #sharedSidebar .logo-title {
+
     color: #ffffff;
 
     font-size: 16px;
@@ -346,6 +363,7 @@
 
 
 #sharedSidebar .logo-subtitle {
+
     margin-top: 4px;
 
     color: #64748b;
@@ -365,13 +383,15 @@
 ========================================================= */
 
 #sharedSidebar .sidebar-menu {
+
     flex: 1;
 
     overflow-y: auto;
 
     overflow-x: hidden;
 
-    padding: 14px 0 28px;
+    padding:
+        14px 0 28px;
 
     scrollbar-width: thin;
 
@@ -382,20 +402,26 @@
 
 
 #sharedSidebar .sidebar-menu::-webkit-scrollbar {
+
     width: 5px;
+
 }
 
 
 #sharedSidebar .sidebar-menu::-webkit-scrollbar-track {
+
     background: transparent;
+
 }
 
 
 #sharedSidebar .sidebar-menu::-webkit-scrollbar-thumb {
+
     background:
         rgba(100,116,139,.30);
 
     border-radius: 999px;
+
 }
 
 
@@ -404,6 +430,7 @@
 ========================================================= */
 
 #sharedSidebar .sidebar-menu-title {
+
     padding:
         16px 28px 7px;
 
@@ -424,6 +451,7 @@
 ========================================================= */
 
 #sharedSidebar .sidebar-nav-item {
+
     position: relative;
 
     display: flex;
@@ -436,9 +464,11 @@
 
     min-height: 45px;
 
-    margin: 3px 12px;
+    margin:
+        3px 12px;
 
-    padding: 11px 16px;
+    padding:
+        11px 16px;
 
     border:
         1px solid transparent;
@@ -466,6 +496,7 @@
 
 
 #sharedSidebar .sidebar-nav-item i {
+
     width: 21px;
 
     flex: 0 0 21px;
@@ -482,6 +513,7 @@
 
 
 #sharedSidebar .sidebar-nav-item span {
+
     min-width: 0;
 
     display: block;
@@ -491,6 +523,7 @@
 
 
 #sharedSidebar .sidebar-nav-item:hover {
+
     color: #ffffff;
 
     background:
@@ -502,7 +535,9 @@
 
 
 #sharedSidebar .sidebar-nav-item:hover i {
+
     color: #5eead4;
+
 }
 
 
@@ -511,6 +546,7 @@
 ========================================================= */
 
 #sharedSidebar .sidebar-nav-item.active {
+
     color: #ffffff;
 
     font-weight: 600;
@@ -532,11 +568,13 @@
 
 
 #sharedSidebar .sidebar-nav-item.active::before {
+
     content: '';
 
     position: absolute;
 
     left: -1px;
+
     top: 9px;
     bottom: 9px;
 
@@ -554,7 +592,9 @@
 
 
 #sharedSidebar .sidebar-nav-item.active i {
+
     color: #5eead4;
+
 }
 
 
@@ -563,7 +603,9 @@
 ========================================================= */
 
 #sharedMobileNav {
+
     display: none;
+
 }
 
 
@@ -574,23 +616,30 @@
 @media (max-width: 1023px) {
 
     #sharedSidebar {
+
         display: none !important;
+
     }
 
 
     #sharedSidebar .sidebar {
+
         display: none !important;
+
     }
 
 
     .main {
+
         margin-left: 0 !important;
 
         padding-bottom: 82px !important;
+
     }
 
 
     #sharedMobileNav {
+
         position: fixed;
 
         left: 0;
@@ -618,10 +667,12 @@
 
         -webkit-backdrop-filter:
             blur(18px);
+
     }
 
 
     #sharedMobileNav .shared-mobile-nav {
+
         width: 100%;
 
         max-width: 750px;
@@ -634,10 +685,12 @@
 
         grid-template-columns:
             repeat(5, minmax(0, 1fr));
+
     }
 
 
     #sharedMobileNav .mobile-nav-item {
+
         position: relative;
 
         min-width: 0;
@@ -652,7 +705,8 @@
 
         gap: 5px;
 
-        padding: 5px 2px;
+        padding:
+            5px 2px;
 
         color: #64748b;
 
@@ -669,25 +723,30 @@
         transition:
             color .18s ease,
             background .18s ease;
+
     }
 
 
     #sharedMobileNav .mobile-nav-item i {
+
         font-size: 18px;
 
         color: inherit;
 
         transition:
             transform .18s ease;
+
     }
 
 
     #sharedMobileNav .mobile-nav-item span {
+
         display: block;
 
         width: 100%;
 
-        padding: 0 2px;
+        padding:
+            0 2px;
 
         overflow: hidden;
 
@@ -696,34 +755,43 @@
         text-overflow: ellipsis;
 
         white-space: nowrap;
+
     }
 
 
     #sharedMobileNav .mobile-nav-item:hover {
+
         color: #cbd5e1;
 
         background:
             rgba(45,212,191,.035);
+
     }
 
 
     #sharedMobileNav .mobile-nav-item.active {
+
         color: #5eead4;
+
     }
 
 
     #sharedMobileNav .mobile-nav-item.active i {
+
         transform:
             translateY(-1px);
+
     }
 
 
     #sharedMobileNav .mobile-nav-item.active::before {
+
         content: '';
 
         position: absolute;
 
         top: 0;
+
         left: 28%;
         right: 28%;
 
@@ -737,6 +805,7 @@
         box-shadow:
             0 0 10px
             rgba(45,212,191,.70);
+
     }
 
 }
@@ -749,17 +818,23 @@
 @media (min-width: 1024px) {
 
     #sharedSidebar {
+
         display: block;
+
     }
 
 
     #sharedSidebar .sidebar {
+
         display: flex;
+
     }
 
 
     #sharedMobileNav {
+
         display: none !important;
+
     }
 
 }
@@ -772,12 +847,16 @@
 @media (max-width: 420px) {
 
     #sharedMobileNav .mobile-nav-item {
+
         font-size: 8px;
+
     }
 
 
     #sharedMobileNav .mobile-nav-item i {
+
         font-size: 17px;
+
     }
 
 }
@@ -823,7 +902,10 @@
 
                         <div class="logo-icon">
 
-                            <i class="fa-solid fa-motorcycle"></i>
+                            <i
+                                class="fa-solid fa-motorcycle"
+                                aria-hidden="true"
+                            ></i>
 
                         </div>
 
@@ -864,32 +946,34 @@
             `;
 
 
-section.items.forEach(item => {
+            section.items.forEach(item => {
 
-    const active =
-        isActivePage(item.href);
+                const active =
+                    isActivePage(item.href);
 
-    html += `
 
-        "
-            class="sidebar-nav-item${active ? ' active' : ''}"
-            ${active ? 'aria-current="page"' : ''}
-        >
+                html += `
 
-            <i
-                class="fa-solid ${escapeAttribute(item.icon)}"
-                aria-hidden="true"
-            ></i>
+                    <a
+                        href="${escapeAttribute(item.href)}"
+                        class="sidebar-nav-item${active ? ' active' : ''}"
+                        ${active ? 'aria-current="page"' : ''}
+                    >
 
-            <span>
-                ${escapeHtml(item.text)}
-            </span>
+                        <i
+                            class="fa-solid ${escapeAttribute(item.icon)}"
+                            aria-hidden="true"
+                        ></i>
 
-        </a>
+                        <span>
+                            ${escapeHtml(item.text)}
+                        </span>
 
-    `;
+                    </a>
 
-});
+                `;
+
+            });
 
         });
 
@@ -903,7 +987,8 @@ section.items.forEach(item => {
         `;
 
 
-        container.innerHTML = html;
+        container.innerHTML =
+            html;
 
     }
 
@@ -949,7 +1034,8 @@ section.items.forEach(item => {
 
             html += `
 
-                "
+                <a
+                    href="${escapeAttribute(item.href)}"
                     class="mobile-nav-item${active ? ' active' : ''}"
                     ${active ? 'aria-current="page"' : ''}
                 >
@@ -977,7 +1063,8 @@ section.items.forEach(item => {
         `;
 
 
-        container.innerHTML = html;
+        container.innerHTML =
+            html;
 
     }
 
@@ -993,7 +1080,9 @@ section.items.forEach(item => {
 
 
         if (!main) {
+
             return;
+
         }
 
 
@@ -1063,7 +1152,8 @@ section.items.forEach(item => {
        WINDOW RESIZE
     ===================================================== */
 
-    let resizeTimer = null;
+    let resizeTimer =
+        null;
 
 
     window.addEventListener(
@@ -1107,5 +1197,6 @@ section.items.forEach(item => {
         initSharedNavigation();
 
     }
+
 
 })();
