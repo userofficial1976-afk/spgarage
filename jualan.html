@@ -25,7 +25,6 @@
 
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script src="supabase-config.js"></script>
 
 <!-- Chart.js -->
@@ -1752,6 +1751,24 @@ document.addEventListener(
     }
 );
 
+function semakChartJS() {
+
+    if (typeof Chart === 'undefined') {
+
+        console.error(
+            'RALAT: Chart.js tidak berjaya dimuatkan.'
+        );
+
+        showToast(
+            'Chart.js tidak berjaya dimuatkan. Semak sambungan CDN.'
+        );
+
+        return false;
+    }
+
+    return true;
+}
+      
 
 /* =========================================================
    MUAT SEMULA SEMUA DATA
@@ -2547,17 +2564,19 @@ function renderCharts(
     paidSales
 ) {
 
+    if (!semakChartJS()) {
+        return;
+    }
+
     renderSalesChart(
         paidSales
     );
-
 
     renderProductChart(
         paidSales
     );
 
 }
-
 
 /* =========================================================
    TREND JUALAN 14 HARI
