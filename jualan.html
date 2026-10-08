@@ -23,6 +23,10 @@
 <!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
 
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js">
+</script>  
+
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
@@ -1017,6 +1021,125 @@ body {
 
 }
 
+
+/* =========================================================
+   FORCE SIDEBAR ICON SAME AS LAPORAN STOK
+========================================================= */
+
+#sharedSidebar .sidebar-nav-item > i,
+#sharedSidebar .sidebar-nav-item > svg {
+    width: 34px !important;
+    height: 34px !important;
+
+    min-width: 34px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 9px !important;
+
+    border-radius: 8px !important;
+
+    color: #67e8f9 !important;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(34, 211, 238, 0.13),
+            rgba(5, 50, 63, 0.52)
+        ) !important;
+
+    border:
+        1px solid
+        rgba(34, 211, 238, 0.22) !important;
+
+    box-shadow:
+        inset 0 0 12px
+        rgba(34, 211, 238, 0.05),
+
+        0 0 10px
+        rgba(34, 211, 238, 0.10) !important;
+
+    filter:
+        drop-shadow(
+            0 0 4px
+            rgba(34, 211, 238, 0.28)
+        ) !important;
+
+    transition:
+        transform 0.25s ease,
+        color 0.25s ease,
+        background 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease !important;
+}
+
+
+/* HOVER */
+
+#sharedSidebar .sidebar-nav-item:hover > i,
+#sharedSidebar .sidebar-nav-item:hover > svg {
+
+    color: #cffafe !important;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(34, 211, 238, 0.19),
+            rgba(5, 50, 63, 0.65)
+        ) !important;
+
+    border-color:
+        rgba(34, 211, 238, 0.40) !important;
+
+    box-shadow:
+        inset 0 0 14px
+        rgba(34, 211, 238, 0.08),
+
+        0 0 14px
+        rgba(34, 211, 238, 0.16) !important;
+
+    transform:
+        translateY(-2px)
+        scale(1.06)
+        rotate(-2deg) !important;
+}
+
+
+/* ACTIVE */
+
+#sharedSidebar .sidebar-nav-item.active > i,
+#sharedSidebar .sidebar-nav-item.active > svg {
+
+    color: #cffafe !important;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(34, 211, 238, 0.20),
+            rgba(5, 50, 63, 0.68)
+        ) !important;
+
+    border-color:
+        rgba(34, 211, 238, 0.42) !important;
+
+    box-shadow:
+        inset 0 0 14px
+        rgba(34, 211, 238, 0.08),
+
+        0 0 15px
+        rgba(34, 211, 238, 0.18) !important;
+
+    filter:
+        drop-shadow(
+            0 0 5px
+            rgba(34, 211, 238, 0.38)
+        ) !important;
+}
+
+
+    
 </style>
 
 </head>
@@ -4904,9 +5027,7 @@ document.addEventListener(
      FONT AWESOME
 ===================================================== -->
 
-<script
-    src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js">
-</script>
+
 
 
 <!-- =====================================================
