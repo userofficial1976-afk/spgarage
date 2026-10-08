@@ -153,5 +153,6 @@ function renderRecent(){el('recentSales').innerHTML=sales.slice(0,7).map(x=>'<di
 function key(v){const d=v instanceof Date?v:new Date(v);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}function fmt(v){return new Date(v).toLocaleString('ms-MY',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}function rm(v){return Number(v||0).toLocaleString('ms-MY',{minimumFractionDigits:2,maximumFractionDigits:2})}function num(v){return Number(v||0).toLocaleString('ms-MY',{maximumFractionDigits:2})}function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}function setLoading(s){el('loading').classList.toggle('show',Boolean(s))}function msg(type,t){el('toast').textContent=t;el('toast').className='toast show '+type;clearTimeout(timer);timer=setTimeout(()=>el('toast').classList.remove('show'),4500)}
 </script>
 
-<script src="sidebar.js"/script>
+<script src="sidebar.js"></script>
+
 </body></html>
