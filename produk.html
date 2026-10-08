@@ -2655,26 +2655,25 @@ function dapatkanUrlGambar(path){
         return '';
     }
 
+    // Jika database sudah menyimpan URL penuh
     if(
         path.startsWith('http://') ||
         path.startsWith('https://')
     ){
-
         return path;
-
     }
 
+    const {
+        data
+    } = db.storage
+        .from('produk')
+        .getPublicUrl(path);
 
-    const { data } =
-        db.storage
-          .from(STORAGE_BUCKET)
-          .getPublicUrl(path);
-
+    console.log('IMAGE PATH:', path);
+    console.log('IMAGE URL:', data?.publicUrl);
 
     return data?.publicUrl || '';
-
 }
-
 
 /* =========================================================
    STATISTIK
