@@ -1,6 +1,6 @@
 /* =========================================================
    SHARED SIDEBAR + MOBILE NAV
-   FUTURISTIC DEEP CYAN V3 - ANIMATED SOFT GLOW
+   FUTURISTIC DEEP CYAN V4 - CONSISTENT FORCE STYLE
 ========================================================= */
 (function () {
     'use strict';
@@ -88,6 +88,21 @@
 @media(min-width:1024px){#sharedSidebar{display:block}#sharedSidebar .sidebar{display:flex}#sharedMobileNav{display:none!important}}
 @media(max-width:420px){#sharedMobileNav .mobile-nav-item{font-size:7.5px}#sharedMobileNav .mobile-nav-item i{width:29px;height:29px;font-size:14px}}
 @media(prefers-reduced-motion:reduce){#sharedSidebar .sidebar-nav-item,#sharedSidebar .sidebar-nav-item i,#sharedSidebar .sidebar-nav-item span,#sharedSidebar .logo-icon,#sharedMobileNav .mobile-nav-item,#sharedMobileNav .mobile-nav-item i{transition:none!important;transform:none!important;animation:none!important}}
+/* V4 CONSISTENCY OVERRIDES: resist page-level .sidebar/.active/i rules */
+html body #sharedSidebar > .sidebar{background:radial-gradient(circle at 30% 4%,rgba(34,211,238,.13) 0%,rgba(9,50,63,.14) 22%,transparent 43%),linear-gradient(180deg,#06303d 0%,#041f2a 43%,#031923 70%,#02141c 100%)!important;border-right:1px solid rgba(34,211,238,.22)!important;color:#e6fbff!important;font-family:"Century Gothic",CenturyGothic,AppleGothic,sans-serif!important}
+html body #sharedSidebar .sidebar-logo{background:transparent!important;border-bottom:1px solid rgba(34,211,238,.10)!important}
+html body #sharedSidebar .sidebar-menu{background:transparent!important}
+html body #sharedSidebar .sidebar-menu-title{color:#3f7884!important;background:transparent!important}
+html body #sharedSidebar a.sidebar-nav-item{display:flex!important;align-items:center!important;gap:11px!important;min-height:49px!important;margin:3px 11px!important;padding:7px 10px!important;border:1px solid transparent!important;border-radius:9px!important;color:#87aeb6!important;background:transparent!important;text-decoration:none!important;font-size:12px!important;font-weight:600!important;line-height:1.25!important}
+html body #sharedSidebar a.sidebar-nav-item > i.fa-solid{width:33px!important;height:33px!important;flex:0 0 33px!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:8px!important;color:#67e8f9!important;font-size:14px!important;background:linear-gradient(145deg,rgba(34,211,238,.095),rgba(5,50,63,.40))!important;border:1px solid rgba(34,211,238,.15)!important;box-shadow:inset 0 0 10px rgba(34,211,238,.025),0 0 7px rgba(34,211,238,.045)!important;text-shadow:0 0 6px rgba(34,211,238,.30)!important}
+html body #sharedSidebar a.sidebar-nav-item:hover{color:#e6fbff!important;background:linear-gradient(90deg,rgba(34,211,238,.065),rgba(34,211,238,.018))!important;border-color:rgba(34,211,238,.11)!important;transform:translateX(2px)!important}
+html body #sharedSidebar a.sidebar-nav-item:hover > i.fa-solid{color:#cffafe!important;border-color:rgba(34,211,238,.34)!important;background:linear-gradient(145deg,rgba(34,211,238,.13),rgba(8,42,56,.45))!important;box-shadow:inset 0 0 12px rgba(34,211,238,.055),0 0 11px rgba(34,211,238,.12)!important;text-shadow:0 0 8px rgba(34,211,238,.52)!important;transform:translateY(-2px) scale(1.055) rotate(-2deg)!important}
+html body #sharedSidebar a.sidebar-nav-item.active{color:#f0fdff!important;font-weight:800!important;background:linear-gradient(90deg,rgba(34,211,238,.115),rgba(13,148,136,.035))!important;border-color:rgba(34,211,238,.20)!important;box-shadow:inset 0 0 20px rgba(34,211,238,.025),0 0 12px rgba(34,211,238,.035)!important}
+html body #sharedSidebar a.sidebar-nav-item.active > i.fa-solid{color:#cffafe!important;border-color:rgba(34,211,238,.38)!important;background:linear-gradient(145deg,rgba(34,211,238,.15),rgba(8,42,56,.48))!important;box-shadow:inset 0 0 12px rgba(34,211,238,.065),0 0 12px rgba(34,211,238,.13)!important;text-shadow:0 0 7px rgba(34,211,238,.55),0 0 13px rgba(34,211,238,.22)!important}
+html body #sharedSidebar .logo-icon{color:#a5f3fc!important;background:linear-gradient(145deg,rgba(34,211,238,.15),rgba(5,42,54,.78))!important;border:1px solid rgba(34,211,238,.25)!important}
+html body #sharedSidebar .logo-title{color:#ecfeff!important}html body #sharedSidebar .logo-subtitle{color:#4f8c98!important}
+@media(max-width:1023px){html body #sharedMobileNav{display:block!important;background:radial-gradient(circle at 50% 100%,rgba(34,211,238,.09),transparent 48%),linear-gradient(180deg,rgba(5,38,49,.985),rgba(2,20,28,.985))!important;border-top:1px solid rgba(34,211,238,.22)!important}html body #sharedMobileNav a.mobile-nav-item{color:#527f89!important;background:transparent!important;text-decoration:none!important}html body #sharedMobileNav a.mobile-nav-item > i.fa-solid{color:#62c8d7!important;background:rgba(34,211,238,.045)!important;border:1px solid rgba(34,211,238,.10)!important}html body #sharedMobileNav a.mobile-nav-item.active{color:#67e8f9!important}html body #sharedMobileNav a.mobile-nav-item.active > i.fa-solid{color:#cffafe!important;background:rgba(34,211,238,.11)!important;border-color:rgba(34,211,238,.30)!important}}
+
 `;
         document.head.appendChild(style);
     }
@@ -131,7 +146,7 @@
             binaSidebar();
             binaMobileNav();
             kemaskiniLayout();
-            console.log('[sidebar.js] Sidebar futuristik V3 berjaya dimuatkan:', currentPage);
+            console.log('[sidebar.js] Sidebar futuristik V4 berjaya dimuatkan:', currentPage);
         } catch (error) {
             console.error('[sidebar.js] Ralat:', error);
         }
