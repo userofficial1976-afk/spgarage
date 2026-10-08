@@ -9,14 +9,18 @@
 
 
     /* =====================================================
-       DAPATKAN NAMA PAGE SEMASA
+       PAGE SEMASA
     ===================================================== */
 
     const currentPage =
-        window.location.pathname
-            .split('/')
-            .pop()
-            .toLowerCase() || 'dashboard.html';
+        (
+            window.location.pathname
+                .split('/')
+                .pop() || 'dashboard.html'
+        )
+        .split('?')[0]
+        .split('#')[0]
+        .toLowerCase();
 
 
     /* =====================================================
@@ -27,6 +31,7 @@
 
         {
             title: 'Utama',
+
             items: [
 
                 {
@@ -65,6 +70,7 @@
 
         {
             title: 'Transaksi',
+
             items: [
 
                 {
@@ -91,6 +97,7 @@
 
         {
             title: 'Laporan',
+
             items: [
 
                 {
@@ -112,12 +119,109 @@
 
 
     /* =====================================================
-       TAMBAH CSS SIDEBAR
+       MOBILE MENU
+    ===================================================== */
+
+    const menuMobile = [
+
+        {
+            href: 'dashboard.html',
+            icon: 'fa-gauge-high',
+            text: 'Dashboard'
+        },
+
+        {
+            href: 'produk.html',
+            icon: 'fa-boxes-stacked',
+            text: 'Produk'
+        },
+
+        {
+            href: 'pos.html',
+            icon: 'fa-cash-register',
+            text: 'POS'
+        },
+
+        {
+            href: 'laporan-stok.html',
+            icon: 'fa-chart-column',
+            text: 'Stok'
+        },
+
+        {
+            href: 'jualan.html',
+            icon: 'fa-receipt',
+            text: 'Jualan'
+        }
+
+    ];
+
+
+    /* =====================================================
+       ESCAPE HTML
+    ===================================================== */
+
+    function escapeHtml(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+            return '';
+        }
+
+
+        return String(value)
+
+            .replace(/&/g, '&amp;')
+
+            .replace(/</g, '&lt;')
+
+            .replace(/>/g, '&gt;')
+
+            .replace(/"/g, '&quot;')
+
+            .replace(/'/g, '&#039;');
+
+    }
+
+
+    function escapeAttribute(value) {
+
+        return escapeHtml(value);
+
+    }
+
+
+    /* =====================================================
+       SEMAK MENU AKTIF
+    ===================================================== */
+
+    function isActivePage(href) {
+
+        const target =
+            String(href || '')
+                .split('?')[0]
+                .split('#')[0]
+                .toLowerCase();
+
+
+        return currentPage === target;
+
+    }
+
+
+    /* =====================================================
+       CSS SIDEBAR
     ===================================================== */
 
     function tambahStyleSidebar() {
 
-        if (document.getElementById('sharedSidebarStyle')) {
+        if (
+            document.getElementById(
+                'shared-navigation-style'
+            )
+        ) {
             return;
         }
 
@@ -127,468 +231,566 @@
 
 
         style.id =
-            'sharedSidebarStyle';
+            'shared-navigation-style';
 
 
         style.textContent = `
 
-            /* =============================================
-               DESKTOP SIDEBAR
-            ============================================= */
+/* =========================================================
+   SHARED SIDEBAR
+========================================================= */
 
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                bottom: 0;
+#sharedSidebar {
+    position: relative;
+    z-index: 100;
+}
 
-                width: 288px;
-                height: 100vh;
 
-                z-index: 100;
+/* =========================================================
+   SIDEBAR DESKTOP
+========================================================= */
 
-                display: flex;
-                flex-direction: column;
+#sharedSidebar .sidebar {
+    position: fixed;
 
-                background:
-                    linear-gradient(
-                        180deg,
-                        rgba(15,23,42,.98),
-                        rgba(11,18,32,.98)
-                    );
+    top: 0;
+    left: 0;
+    bottom: 0;
 
-                border-right:
-                    1px solid rgba(148,163,184,.12);
+    width: 288px;
+    height: 100vh;
 
-                box-shadow:
-                    12px 0 40px rgba(0,0,0,.15);
+    z-index: 100;
 
-                overflow: hidden;
-            }
+    display: flex;
+    flex-direction: column;
 
+    overflow: hidden;
 
-            /* =============================================
-               LOGO
-            ============================================= */
+    background:
+        linear-gradient(
+            180deg,
+            rgba(15,23,42,.99) 0%,
+            rgba(11,18,32,.99) 100%
+        );
 
-            .sidebar-logo {
-                flex-shrink: 0;
+    border-right:
+        1px solid rgba(148,163,184,.12);
 
-                padding:
-                    22px 18px 18px;
+    box-shadow:
+        12px 0 40px rgba(0,0,0,.14);
 
-                border-bottom:
-                    1px solid rgba(148,163,184,.08);
-            }
+    font-family:
+        Inter,
+        Arial,
+        sans-serif;
+}
 
 
-            .logo-box {
-                display: flex;
-                align-items: center;
-                gap: 13px;
-            }
+/* =========================================================
+   LOGO
+========================================================= */
 
+#sharedSidebar .sidebar-logo {
+    flex-shrink: 0;
 
-            .logo-icon {
-                width: 46px;
-                height: 46px;
+    padding: 22px 18px 18px;
 
-                flex-shrink: 0;
+    border-bottom:
+        1px solid rgba(148,163,184,.08);
+}
 
-                display: flex;
-                align-items: center;
-                justify-content: center;
 
-                border-radius: 14px;
+#sharedSidebar .logo-box {
+    display: flex;
 
-                color: #5eead4;
+    align-items: center;
 
-                font-size: 20px;
+    gap: 13px;
+}
 
-                background:
-                    linear-gradient(
-                        135deg,
-                        rgba(20,184,166,.18),
-                        rgba(13,148,136,.08)
-                    );
 
-                border:
-                    1px solid rgba(45,212,191,.18);
+#sharedSidebar .logo-icon {
+    width: 46px;
+    height: 46px;
 
-                box-shadow:
-                    0 8px 25px rgba(13,148,136,.10);
-            }
+    flex-shrink: 0;
 
+    display: flex;
 
-            .logo-title {
-                color: #ffffff;
+    align-items: center;
 
-                font-size: 16px;
-                font-weight: 700;
+    justify-content: center;
 
-                line-height: 1.2;
-            }
+    border-radius: 14px;
 
+    color: #5eead4;
 
-            .logo-subtitle {
-                margin-top: 4px;
+    font-size: 20px;
 
-                color: #64748b;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(20,184,166,.20),
+            rgba(13,148,136,.08)
+        );
 
-                font-size: 10px;
-                font-weight: 500;
+    border:
+        1px solid rgba(45,212,191,.18);
 
-                text-transform: uppercase;
+    box-shadow:
+        0 8px 25px
+        rgba(13,148,136,.10);
+}
 
-                letter-spacing: .08em;
-            }
 
+#sharedSidebar .logo-title {
+    color: #ffffff;
 
-            /* =============================================
-               MENU
-            ============================================= */
+    font-size: 16px;
 
-            .sidebar .menu {
-                flex: 1;
+    font-weight: 700;
 
-                overflow-y: auto;
+    line-height: 1.2;
+}
 
-                padding:
-                    14px 0 25px;
 
-                scrollbar-width: thin;
+#sharedSidebar .logo-subtitle {
+    margin-top: 4px;
 
-                scrollbar-color:
-                    rgba(100,116,139,.30)
-                    transparent;
-            }
+    color: #64748b;
 
+    font-size: 10px;
 
-            .sidebar .menu::-webkit-scrollbar {
-                width: 5px;
-            }
+    font-weight: 600;
 
+    text-transform: uppercase;
 
-            .sidebar .menu::-webkit-scrollbar-track {
-                background: transparent;
-            }
+    letter-spacing: .08em;
+}
 
 
-            .sidebar .menu::-webkit-scrollbar-thumb {
-                background:
-                    rgba(100,116,139,.30);
+/* =========================================================
+   SIDEBAR MENU
+========================================================= */
 
-                border-radius: 999px;
-            }
+#sharedSidebar .sidebar-menu {
+    flex: 1;
 
+    overflow-y: auto;
 
-            .menu-title {
-                padding:
-                    16px 28px 7px;
+    overflow-x: hidden;
 
-                color: #475569;
+    padding: 14px 0 28px;
 
-                font-size: 10px;
-                font-weight: 700;
+    scrollbar-width: thin;
 
-                text-transform: uppercase;
+    scrollbar-color:
+        rgba(100,116,139,.30)
+        transparent;
+}
 
-                letter-spacing: .12em;
-            }
 
+#sharedSidebar .sidebar-menu::-webkit-scrollbar {
+    width: 5px;
+}
 
-            .sidebar .menu a {
-                position: relative;
 
-                display: flex;
-                align-items: center;
+#sharedSidebar .sidebar-menu::-webkit-scrollbar-track {
+    background: transparent;
+}
 
-                gap: 13px;
 
-                min-height: 45px;
+#sharedSidebar .sidebar-menu::-webkit-scrollbar-thumb {
+    background:
+        rgba(100,116,139,.30);
 
-                margin:
-                    3px 12px;
+    border-radius: 999px;
+}
 
-                padding:
-                    11px 16px;
 
-                border:
-                    1px solid transparent;
+/* =========================================================
+   MENU SECTION
+========================================================= */
 
-                border-radius: 12px;
+#sharedSidebar .sidebar-menu-title {
+    padding:
+        16px 28px 7px;
 
-                color: #94a3b8;
+    color: #475569;
 
-                font-size: 13px;
-                font-weight: 500;
+    font-size: 10px;
 
-                text-decoration: none;
+    font-weight: 800;
 
-                transition:
-                    background .2s ease,
-                    color .2s ease,
-                    border-color .2s ease,
-                    transform .2s ease;
-            }
+    text-transform: uppercase;
 
+    letter-spacing: .12em;
+}
 
-            .sidebar .menu a:hover {
-                color: #ffffff;
 
-                background:
-                    rgba(45,212,191,.07);
+/* =========================================================
+   MENU ITEM
+========================================================= */
 
-                transform:
-                    translateX(2px);
-            }
+#sharedSidebar .sidebar-nav-item {
+    position: relative;
 
+    display: flex;
 
-            .sidebar .menu a i {
-                width: 21px;
+    align-items: center;
 
-                flex-shrink: 0;
+    gap: 13px;
 
-                text-align: center;
+    width: auto;
 
-                color: #64748b;
+    min-height: 45px;
 
-                font-size: 15px;
+    margin: 3px 12px;
 
-                transition:
-                    color .2s ease;
-            }
+    padding: 11px 16px;
 
+    border:
+        1px solid transparent;
 
-            .sidebar .menu a:hover i {
-                color: #5eead4;
-            }
+    border-radius: 12px;
 
+    color: #94a3b8;
 
-            /* =============================================
-               ACTIVE MENU
-            ============================================= */
+    background: transparent;
 
-            .sidebar .menu a.active {
-                color: #ffffff;
+    text-decoration: none;
 
-                font-weight: 600;
+    font-size: 13px;
 
-                background:
-                    linear-gradient(
-                        135deg,
-                        rgba(20,184,166,.20),
-                        rgba(13,148,136,.08)
-                    );
+    font-weight: 500;
 
-                border-color:
-                    rgba(45,212,191,.16);
+    line-height: 1.25;
 
-                box-shadow:
-                    inset 0 0 20px
-                    rgba(45,212,191,.025);
-            }
+    transition:
+        color .18s ease,
+        background .18s ease,
+        border-color .18s ease,
+        transform .18s ease;
+}
 
 
-            .sidebar .menu a.active::before {
-                content: '';
+#sharedSidebar .sidebar-nav-item i {
+    width: 21px;
 
-                position: absolute;
+    flex: 0 0 21px;
 
-                left: 0;
-                top: 9px;
-                bottom: 9px;
+    text-align: center;
 
-                width: 3px;
+    color: #64748b;
 
-                border-radius:
-                    0 4px 4px 0;
+    font-size: 15px;
 
-                background: #2dd4bf;
+    transition:
+        color .18s ease;
+}
 
-                box-shadow:
-                    0 0 12px
-                    rgba(45,212,191,.60);
-            }
 
+#sharedSidebar .sidebar-nav-item span {
+    min-width: 0;
 
-            .sidebar .menu a.active i {
-                color: #5eead4;
-            }
+    display: block;
 
+    white-space: normal;
+}
 
-            /* =============================================
-               MOBILE NAV CONTAINER
-            ============================================= */
 
-            #sharedMobileNav {
-                display: none;
-            }
+#sharedSidebar .sidebar-nav-item:hover {
+    color: #ffffff;
 
+    background:
+        rgba(45,212,191,.07);
 
-            /* =============================================
-               TABLET / MOBILE
-            ============================================= */
+    transform:
+        translateX(2px);
+}
 
-            @media (max-width: 1023px) {
 
-                .sidebar {
-                    display: none !important;
-                }
+#sharedSidebar .sidebar-nav-item:hover i {
+    color: #5eead4;
+}
 
 
-                .main {
-                    margin-left: 0 !important;
+/* =========================================================
+   ACTIVE MENU
+========================================================= */
 
-                    padding-bottom: 82px;
-                }
+#sharedSidebar .sidebar-nav-item.active {
+    color: #ffffff;
 
+    font-weight: 600;
 
-                #sharedMobileNav {
-                    position: fixed;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(20,184,166,.20),
+            rgba(13,148,136,.08)
+        );
 
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
+    border-color:
+        rgba(45,212,191,.16);
 
-                    z-index: 99999;
+    box-shadow:
+        inset 0 0 20px
+        rgba(45,212,191,.025);
+}
 
-                    display: block;
 
-                    background:
-                        rgba(15,23,42,.97);
+#sharedSidebar .sidebar-nav-item.active::before {
+    content: '';
 
-                    border-top:
-                        1px solid rgba(148,163,184,.14);
+    position: absolute;
 
-                    box-shadow:
-                        0 -10px 35px rgba(0,0,0,.18);
+    left: -1px;
+    top: 9px;
+    bottom: 9px;
 
-                    backdrop-filter:
-                        blur(18px);
+    width: 3px;
 
-                    -webkit-backdrop-filter:
-                        blur(18px);
-                }
+    border-radius:
+        0 5px 5px 0;
 
+    background: #2dd4bf;
 
-                .shared-mobile-nav {
-                    width: 100%;
-                    height: 70px;
+    box-shadow:
+        0 0 12px
+        rgba(45,212,191,.65);
+}
 
-                    max-width: 750px;
 
-                    margin: 0 auto;
+#sharedSidebar .sidebar-nav-item.active i {
+    color: #5eead4;
+}
 
-                    display: grid;
 
-                    grid-template-columns:
-                        repeat(5,1fr);
-                }
+/* =========================================================
+   MOBILE NAV DEFAULT
+========================================================= */
 
+#sharedMobileNav {
+    display: none;
+}
 
-                .shared-mobile-nav a {
-                    position: relative;
 
-                    min-width: 0;
+/* =========================================================
+   TABLET / MOBILE
+========================================================= */
 
-                    display: flex;
-                    flex-direction: column;
+@media (max-width: 1023px) {
 
-                    align-items: center;
-                    justify-content: center;
+    #sharedSidebar {
+        display: none !important;
+    }
 
-                    gap: 5px;
 
-                    color: #64748b;
+    #sharedSidebar .sidebar {
+        display: none !important;
+    }
 
-                    text-decoration: none;
 
-                    font-size: 9px;
-                    font-weight: 600;
+    .main {
+        margin-left: 0 !important;
 
-                    transition:
-                        color .2s ease,
-                        background .2s ease;
-                }
+        padding-bottom: 82px !important;
+    }
 
 
-                .shared-mobile-nav a i {
-                    font-size: 18px;
+    #sharedMobileNav {
+        position: fixed;
 
-                    transition:
-                        transform .2s ease,
-                        color .2s ease;
-                }
+        left: 0;
+        right: 0;
+        bottom: 0;
 
+        z-index: 99999;
 
-                .shared-mobile-nav a span {
-                    max-width: 100%;
+        display: block;
 
-                    overflow: hidden;
+        min-height: 70px;
 
-                    text-overflow: ellipsis;
+        background:
+            rgba(15,23,42,.97);
 
-                    white-space: nowrap;
-                }
+        border-top:
+            1px solid rgba(148,163,184,.14);
 
+        box-shadow:
+            0 -10px 35px
+            rgba(0,0,0,.18);
 
-                .shared-mobile-nav a:hover {
-                    color: #94a3b8;
+        backdrop-filter:
+            blur(18px);
 
-                    background:
-                        rgba(45,212,191,.035);
-                }
+        -webkit-backdrop-filter:
+            blur(18px);
+    }
 
 
-                .shared-mobile-nav a.active {
-                    color: #5eead4;
-                }
+    #sharedMobileNav .shared-mobile-nav {
+        width: 100%;
 
+        max-width: 750px;
 
-                .shared-mobile-nav a.active i {
-                    color: #5eead4;
+        height: 70px;
 
-                    transform:
-                        translateY(-1px);
-                }
+        margin: 0 auto;
 
+        display: grid;
 
-                .shared-mobile-nav a.active::before {
-                    content: '';
+        grid-template-columns:
+            repeat(5, minmax(0, 1fr));
+    }
 
-                    position: absolute;
 
-                    top: 0;
-                    left: 28%;
-                    right: 28%;
+    #sharedMobileNav .mobile-nav-item {
+        position: relative;
 
-                    height: 2px;
+        min-width: 0;
 
-                    border-radius:
-                        0 0 5px 5px;
+        display: flex;
 
-                    background: #2dd4bf;
+        flex-direction: column;
 
-                    box-shadow:
-                        0 0 10px
-                        rgba(45,212,191,.7);
-                }
+        align-items: center;
 
-            }
+        justify-content: center;
 
+        gap: 5px;
 
-            /* =============================================
-               DESKTOP
-            ============================================= */
+        padding: 5px 2px;
 
-            @media (min-width: 1024px) {
+        color: #64748b;
 
-                #sharedMobileNav {
-                    display: none !important;
-                }
+        background: transparent;
 
-            }
+        text-decoration: none;
+
+        font-size: 9px;
+
+        font-weight: 600;
+
+        line-height: 1.1;
+
+        transition:
+            color .18s ease,
+            background .18s ease;
+    }
+
+
+    #sharedMobileNav .mobile-nav-item i {
+        font-size: 18px;
+
+        color: inherit;
+
+        transition:
+            transform .18s ease;
+    }
+
+
+    #sharedMobileNav .mobile-nav-item span {
+        display: block;
+
+        width: 100%;
+
+        padding: 0 2px;
+
+        overflow: hidden;
+
+        text-align: center;
+
+        text-overflow: ellipsis;
+
+        white-space: nowrap;
+    }
+
+
+    #sharedMobileNav .mobile-nav-item:hover {
+        color: #cbd5e1;
+
+        background:
+            rgba(45,212,191,.035);
+    }
+
+
+    #sharedMobileNav .mobile-nav-item.active {
+        color: #5eead4;
+    }
+
+
+    #sharedMobileNav .mobile-nav-item.active i {
+        transform:
+            translateY(-1px);
+    }
+
+
+    #sharedMobileNav .mobile-nav-item.active::before {
+        content: '';
+
+        position: absolute;
+
+        top: 0;
+        left: 28%;
+        right: 28%;
+
+        height: 2px;
+
+        border-radius:
+            0 0 5px 5px;
+
+        background: #2dd4bf;
+
+        box-shadow:
+            0 0 10px
+            rgba(45,212,191,.70);
+    }
+
+}
+
+
+/* =========================================================
+   DESKTOP
+========================================================= */
+
+@media (min-width: 1024px) {
+
+    #sharedSidebar {
+        display: block;
+    }
+
+
+    #sharedSidebar .sidebar {
+        display: flex;
+    }
+
+
+    #sharedMobileNav {
+        display: none !important;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE KECIL
+========================================================= */
+
+@media (max-width: 420px) {
+
+    #sharedMobileNav .mobile-nav-item {
+        font-size: 8px;
+    }
+
+
+    #sharedMobileNav .mobile-nav-item i {
+        font-size: 17px;
+    }
+
+}
 
         `;
 
@@ -599,7 +801,7 @@
 
 
     /* =====================================================
-       BINA SIDEBAR
+       BINA SIDEBAR DESKTOP
     ===================================================== */
 
     function binaSidebar() {
@@ -613,7 +815,7 @@
         if (!container) {
 
             console.warn(
-                '[sidebar.js] #sharedSidebar tidak dijumpai.'
+                '[sidebar.js] Elemen #sharedSidebar tidak dijumpai.'
             );
 
             return;
@@ -635,6 +837,7 @@
 
                         </div>
 
+
                         <div>
 
                             <div class="logo-title">
@@ -652,7 +855,10 @@
                 </div>
 
 
-                <nav class="menu">
+                <nav
+                    class="sidebar-menu"
+                    aria-label="Navigasi utama"
+                >
 
         `;
 
@@ -661,7 +867,7 @@
 
             html += `
 
-                <div class="menu-title">
+                <div class="sidebar-menu-title">
                     ${escapeHtml(section.title)}
                 </div>
 
@@ -671,10 +877,7 @@
             section.items.forEach(item => {
 
                 const active =
-                    currentPage ===
-                    item.href.toLowerCase()
-                        ? 'active'
-                        : '';
+                    isActivePage(item.href);
 
 
                 html += `
@@ -683,6 +886,7 @@
 
                         <i
                             class="fa-solid ${escapeAttribute(item.icon)}"
+                            aria-hidden="true"
                         ></i>
 
                         <span>
@@ -713,7 +917,7 @@
 
 
     /* =====================================================
-       MOBILE NAV
+       BINA MOBILE NAV
     ===================================================== */
 
     function binaMobileNav() {
@@ -727,7 +931,7 @@
         if (!container) {
 
             console.warn(
-                '[sidebar.js] #sharedMobileNav tidak dijumpai.'
+                '[sidebar.js] Elemen #sharedMobileNav tidak dijumpai.'
             );
 
             return;
@@ -735,73 +939,32 @@
         }
 
 
-        const items = [
-
-            {
-                href: 'dashboard.html',
-                icon: 'fa-gauge-high',
-                text: 'Dashboard'
-            },
-
-            {
-                href: 'produk.html',
-                icon: 'fa-boxes-stacked',
-                text: 'Produk'
-            },
-
-            {
-                href: 'pos.html',
-                icon: 'fa-cash-register',
-                text: 'POS'
-            },
-
-            {
-                href: 'laporan-stok.html',
-                icon: 'fa-chart-column',
-                text: 'Stok'
-            },
-
-            {
-                href: 'jualan.html',
-                icon: 'fa-receipt',
-                text: 'Jualan'
-            }
-
-        ];
-
-
         let html = `
 
             <nav
                 class="shared-mobile-nav"
-                aria-label="Navigasi utama"
+                aria-label="Navigasi mudah alih"
             >
 
         `;
 
 
-        items.forEach(item => {
+        menuMobile.forEach(item => {
 
             const active =
-                currentPage ===
-                item.href.toLowerCase()
-                    ? 'active'
-                    : '';
+                isActivePage(item.href);
 
 
             html += `
 
                 "
-                    class="${active}"
-                    ${
-                        active
-                            ? 'aria-current="page"'
-                            : ''
-                    }
+                    class="mobile-nav-item${active ? ' active' : ''}"
+                    ${active ? 'aria-current="page"' : ''}
                 >
 
                     <i
                         class="fa-solid ${escapeAttribute(item.icon)}"
+                        aria-hidden="true"
                     ></i>
 
                     <span>
@@ -828,56 +991,43 @@
 
 
     /* =====================================================
-       ESCAPE HTML
+       BETULKAN MAIN LAYOUT
     ===================================================== */
 
-    function escapeHtml(value) {
+    function kemaskiniLayout() {
 
-        if (
-            value === null ||
-            value === undefined
-        ) {
-            return '';
+        const main =
+            document.querySelector('.main');
+
+
+        if (!main) {
+            return;
         }
 
 
-        return String(value)
+        /*
+         * Desktop:
+         * ruang 288px untuk sidebar.
+         *
+         * Tablet/mobile:
+         * CSS media query akan ubah kepada 0.
+         */
 
-            .replace(
-                /&/g,
-                '&amp;'
-            )
+        if (
+            window.matchMedia(
+                '(min-width: 1024px)'
+            ).matches
+        ) {
 
-            .replace(
-                /</g,
-                '&lt;'
-            )
+            main.style.marginLeft =
+                '288px';
 
-            .replace(
-                />/g,
-                '&gt;'
-            )
+        } else {
 
-            .replace(
-                /"/g,
-                '&quot;'
-            )
+            main.style.marginLeft =
+                '0';
 
-            .replace(
-                /'/g,
-                '&#039;'
-            );
-
-    }
-
-
-    /* =====================================================
-       ESCAPE ATTRIBUTE
-    ===================================================== */
-
-    function escapeAttribute(value) {
-
-        return escapeHtml(value);
+        }
 
     }
 
@@ -896,9 +1046,11 @@
 
             binaMobileNav();
 
+            kemaskiniLayout();
+
 
             console.log(
-                '[sidebar.js] Shared navigation berjaya dimuatkan.',
+                '[sidebar.js] Sidebar berjaya dimuatkan:',
                 currentPage
             );
 
@@ -906,7 +1058,7 @@
         } catch (error) {
 
             console.error(
-                '[sidebar.js] Gagal membina sidebar:',
+                '[sidebar.js] Ralat:',
                 error
             );
 
@@ -916,11 +1068,38 @@
 
 
     /* =====================================================
+       WINDOW RESIZE
+    ===================================================== */
+
+    let resizeTimer = null;
+
+
+    window.addEventListener(
+        'resize',
+        function () {
+
+            clearTimeout(
+                resizeTimer
+            );
+
+
+            resizeTimer =
+                setTimeout(
+                    kemaskiniLayout,
+                    100
+                );
+
+        }
+    );
+
+
+    /* =====================================================
        RUN
     ===================================================== */
 
     if (
-        document.readyState === 'loading'
+        document.readyState ===
+        'loading'
     ) {
 
         document.addEventListener(
