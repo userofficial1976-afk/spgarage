@@ -1,0 +1,4902 @@
+<!DOCTYPE html>
+<html lang="ms">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+    Dashboard Jualan — Inventori & POS
+</title>
+
+<link
+    rel="icon"
+    href="logomdp.png"
+    type="image/png"
+>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase-config.js"></script>
+
+<!-- Chart.js -->
+https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.jsscript>
+
+
+<style>
+
+/* =========================================================
+   ROOT
+========================================================= */
+
+:root {
+
+    --bg: #03141d;
+
+    --panel: #06212d;
+
+    --panel2: #082a38;
+
+    --line: rgba(34,211,238,.24);
+
+    --cyan: #22d3ee;
+
+    --teal: #2dd4bf;
+
+    --muted: #7ca4b2;
+
+    --txt: #e6fbff;
+
+    --red: #fb7185;
+
+}
+
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+* {
+
+    box-sizing: border-box;
+
+    font-family:
+        "Century Gothic",
+        CenturyGothic,
+        AppleGothic,
+        sans-serif;
+
+}
+
+
+html {
+
+    scroll-behavior: smooth;
+
+}
+
+
+body {
+
+    margin: 0;
+
+    background:
+        radial-gradient(
+            circle at 50% 10%,
+            #073344 0,
+            #03141d 45%,
+            #020e15 100%
+        );
+
+    color: var(--txt);
+
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main {
+
+    margin-left: 288px;
+
+    min-height: 100vh;
+
+}
+
+
+.content {
+
+    max-width: 1700px;
+
+    margin: auto;
+
+    padding: 20px;
+
+}
+
+
+/* =========================================================
+   HUD PANEL
+========================================================= */
+
+.hud {
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(8,42,56,.88),
+            rgba(3,25,35,.88)
+        );
+
+    border:
+        1px solid var(--line);
+
+    box-shadow:
+        inset 0 0 28px rgba(34,211,238,.025),
+        0 0 20px rgba(0,0,0,.25);
+
+    border-radius: 8px;
+
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.header {
+
+    text-align: center;
+
+    padding: 16px 20px;
+
+    margin-bottom: 13px;
+
+    position: relative;
+
+}
+
+
+.header::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: 5%;
+
+    right: 5%;
+
+    bottom: 0;
+
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            #22d3ee,
+            transparent
+        );
+
+}
+
+
+.title {
+
+    font-size: 27px;
+
+    font-weight: 900;
+
+    text-shadow:
+        0 0 14px
+        rgba(34,211,238,.3);
+
+}
+
+
+.sub {
+
+    font-size: 11px;
+
+    color: #59b9c8;
+
+    margin-top: 4px;
+
+}
+
+
+/* =========================================================
+   STATISTIC CARDS
+========================================================= */
+
+.stats {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 10px;
+
+    margin-bottom: 12px;
+
+}
+
+
+.stat {
+
+    padding: 15px;
+
+}
+
+
+.stat .k {
+
+    font-size: 11px;
+
+    color: #4cc4cf;
+
+}
+
+
+.stat .v {
+
+    font-size: 23px;
+
+    font-weight: 800;
+
+    margin-top: 5px;
+
+}
+
+
+/* =========================================================
+   DASHBOARD LAYOUT
+========================================================= */
+
+.layout {
+
+    display: grid;
+
+    grid-template-columns:
+        300px
+        minmax(0, 1fr)
+        330px;
+
+    gap: 12px;
+
+}
+
+
+.col {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+
+}
+
+
+.panel {
+
+    padding: 14px;
+
+}
+
+
+/* =========================================================
+   PANEL HEADER
+========================================================= */
+
+.ph {
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    color: #b9f6ff;
+
+    margin-bottom: 12px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+}
+
+
+.ph::before {
+
+    content: "";
+
+    width: 5px;
+
+    height: 18px;
+
+    background: #22d3ee;
+
+    box-shadow:
+        0 0 10px #22d3ee;
+
+    transform:
+        skew(-15deg);
+
+}
+
+
+/* =========================================================
+   PERFORMANCE
+========================================================= */
+
+.metric {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    font-size: 11px;
+
+    margin: 9px 0;
+
+}
+
+
+.bar {
+
+    height: 9px;
+
+    background: #0c3442;
+
+    border:
+        1px solid
+        rgba(34,211,238,.15);
+
+    display: flex;
+
+    gap: 2px;
+
+    padding: 1px;
+
+}
+
+
+.bar i {
+
+    display: block;
+
+    background: #22d3ee;
+
+    box-shadow:
+        0 0 5px
+        rgba(34,211,238,.5);
+
+}
+
+
+/* =========================================================
+   TOP PRODUCT
+========================================================= */
+
+.rank {
+
+    padding: 9px 0;
+
+    border-bottom:
+        1px solid
+        rgba(34,211,238,.12);
+
+}
+
+
+.rankline {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    gap: 8px;
+
+    font-size: 11px;
+
+}
+
+
+.rankline b:last-child {
+
+    color: #22d3ee;
+
+}
+
+
+.mini {
+
+    font-size: 9px;
+
+    color: #4fa8b5;
+
+    margin-top: 3px;
+
+}
+
+
+/* =========================================================
+   PAYMENT RING
+========================================================= */
+
+.payring {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 10px;
+
+}
+
+
+.ring {
+
+    aspect-ratio: 1;
+
+    border-radius: 50%;
+
+    display: grid;
+
+    place-items: center;
+
+    background:
+        conic-gradient(
+            #22d3ee var(--p),
+            #0b3443 0
+        );
+
+    position: relative;
+
+}
+
+
+.ring::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 11px;
+
+    border-radius: 50%;
+
+    background: #06212d;
+
+}
+
+
+.ring span {
+
+    z-index: 1;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    text-align: center;
+
+}
+
+
+/* =========================================================
+   RECENT SALES
+========================================================= */
+
+.recent {
+
+    padding: 8px 0;
+
+    border-bottom:
+        1px solid
+        rgba(34,211,238,.1);
+
+}
+
+
+.recent .n {
+
+    font-size: 10px;
+
+    color: #67e8f9;
+
+}
+
+
+.recent .r {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    margin-top: 3px;
+
+    font-size: 10px;
+
+}
+
+
+/* =========================================================
+   CHART
+========================================================= */
+
+.chartbox {
+
+    height: 280px;
+
+}
+
+
+.chartbox.small {
+
+    height: 220px;
+
+}
+
+
+/* =========================================================
+   FILTER
+========================================================= */
+
+.filters {
+
+    display: grid;
+
+    grid-template-columns:
+        2fr
+        1fr
+        1fr
+        1fr
+        1fr
+        auto;
+
+    gap: 8px;
+
+    margin: 13px 0;
+
+}
+
+
+.inp {
+
+    background: #041a24;
+
+    border:
+        1px solid var(--line);
+
+    color: #dffaff;
+
+    padding: 9px 10px;
+
+    border-radius: 6px;
+
+    outline: none;
+
+    font-size: 11px;
+
+}
+
+
+.inp:focus {
+
+    border-color: #22d3ee;
+
+    box-shadow:
+        0 0 0 2px
+        rgba(34,211,238,.06);
+
+}
+
+
+.inp option {
+
+    background: #06212d;
+
+    color: white;
+
+}
+
+
+.btn {
+
+    background: #0b5361;
+
+    border:
+        1px solid #1a92a3;
+
+    color: white;
+
+    border-radius: 6px;
+
+    padding: 9px 13px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+}
+
+
+.btn:hover {
+
+    background: #0e6676;
+
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.tablewrap {
+
+    overflow: auto;
+
+}
+
+
+.tbl {
+
+    width: 100%;
+
+    min-width: 1100px;
+
+    border-collapse:
+        collapse;
+
+}
+
+
+.tbl th {
+
+    padding: 11px;
+
+    text-align: left;
+
+    color: #4cc4cf;
+
+    font-size: 9px;
+
+    text-transform:
+        uppercase;
+
+    background: #062631;
+
+    border-bottom:
+        1px solid var(--line);
+
+    white-space: nowrap;
+
+}
+
+
+.tbl td {
+
+    padding: 10px 11px;
+
+    border-bottom:
+        1px solid
+        rgba(34,211,238,.08);
+
+    font-size: 10px;
+
+}
+
+
+.tbl tbody tr:hover {
+
+    background:
+        rgba(34,211,238,.025);
+
+}
+
+
+/* =========================================================
+   STATUS BADGE
+========================================================= */
+
+.badge {
+
+    padding: 4px 7px;
+
+    border-radius: 999px;
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+}
+
+
+.paid {
+
+    background:
+        rgba(45,212,191,.1);
+
+    color: #5eead4;
+
+}
+
+
+.cancel {
+
+    background:
+        rgba(251,113,133,.1);
+
+    color: #fda4af;
+
+}
+
+
+/* =========================================================
+   ACTION BUTTON
+========================================================= */
+
+.act {
+
+    border:
+        1px solid var(--line);
+
+    background: #082a38;
+
+    color: #67e8f9;
+
+    border-radius: 5px;
+
+    padding: 5px 7px;
+
+    margin-right: 3px;
+
+    cursor: pointer;
+
+}
+
+
+.act:hover {
+
+    background: #0b3a49;
+
+    border-color: #22d3ee;
+
+}
+
+
+/* =========================================================
+   DETAIL MODAL
+========================================================= */
+
+.modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(0,8,12,.8);
+
+    z-index: 1000;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 15px;
+
+}
+
+
+.modal.show {
+
+    display: flex;
+
+}
+
+
+.modalbox {
+
+    width: 100%;
+
+    max-width: 760px;
+
+    max-height: 90vh;
+
+    overflow: auto;
+
+    background: #041a24;
+
+    border:
+        1px solid #167b8b;
+
+    border-radius: 10px;
+
+    padding: 18px;
+
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.loading {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 2000;
+
+    background:
+        rgba(0,10,15,.75);
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+
+.loading.show {
+
+    display: flex;
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast {
+
+    position: fixed;
+
+    right: 20px;
+
+    bottom: 20px;
+
+    background: #05202b;
+
+    border:
+        1px solid #22d3ee;
+
+    padding: 12px 16px;
+
+    border-radius: 8px;
+
+    display: none;
+
+    z-index: 3000;
+
+    font-size: 11px;
+
+    max-width: 400px;
+
+}
+
+
+.toast.show {
+
+    display: block;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1250px) {
+
+    .layout {
+
+        grid-template-columns:
+            1fr 2fr;
+
+    }
+
+
+    .right {
+
+        grid-column:
+            1 / -1;
+
+        display: grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+    }
+
+
+    .stats {
+
+        grid-template-columns:
+            repeat(2,1fr);
+
+    }
+
+}
+
+
+@media(max-width:1023px) {
+
+    .main {
+
+        margin-left: 0;
+
+        padding-bottom: 72px;
+
+    }
+
+
+    .content {
+
+        padding: 13px;
+
+    }
+
+}
+
+
+@media(max-width:700px) {
+
+    .layout,
+    .right {
+
+        display: block;
+
+    }
+
+
+    .col > *,
+    .right > * {
+
+        margin-bottom: 10px;
+
+    }
+
+
+    .stats {
+
+        grid-template-columns:
+            1fr 1fr;
+
+    }
+
+
+    .filters {
+
+        grid-template-columns:
+            1fr 1fr;
+
+    }
+
+
+    .title {
+
+        font-size: 20px;
+
+    }
+
+
+    .chartbox {
+
+        height: 230px;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     SHARED SIDEBAR
+===================================================== -->
+
+<div id="sharedSidebar"></div>
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main class="main">
+
+<div class="content">
+
+
+<!-- =====================================================
+     TITLE
+===================================================== -->
+
+<div class="hud header">
+
+    <div class="title">
+
+        RINGKASAN JUALAN
+
+    </div>
+
+
+    <div class="sub">
+
+        Dashboard Prestasi & Sejarah Transaksi
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     STATISTIC CARDS
+===================================================== -->
+
+<div class="stats">
+
+
+    <!-- JUALAN HARI INI -->
+
+    <div class="hud stat">
+
+        <div class="k">
+
+            Jualan Hari Ini
+
+        </div>
+
+        <div
+            class="v"
+            id="sHari">
+
+            RM 0.00
+
+        </div>
+
+    </div>
+
+
+    <!-- JUALAN BULAN INI -->
+
+    <div class="hud stat">
+
+        <div class="k">
+
+            Jualan Bulan Ini
+
+        </div>
+
+        <div
+            class="v"
+            id="sBulan">
+
+            RM 0.00
+
+        </div>
+
+    </div>
+
+
+    <!-- JUMLAH TRANSAKSI -->
+
+    <div class="hud stat">
+
+        <div class="k">
+
+            Jumlah Transaksi Bulan Ini
+
+        </div>
+
+        <div
+            class="v"
+            id="sTrans">
+
+            0
+
+        </div>
+
+    </div>
+
+
+    <!-- PURATA TRANSAKSI -->
+
+    <div class="hud stat">
+
+        <div class="k">
+
+            Purata / Transaksi
+
+        </div>
+
+        <div
+            class="v"
+            id="sPurata">
+
+            RM 0.00
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     DASHBOARD
+===================================================== -->
+
+<div class="layout">
+
+
+<!-- =====================================================
+     LEFT COLUMN
+===================================================== -->
+
+<div class="col">
+
+
+    <!-- PRESTASI JUALAN -->
+
+    <div class="hud panel">
+
+        <div class="ph">
+
+            Prestasi Jualan
+
+        </div>
+
+
+        <div class="metric">
+
+            <span>
+                Transaksi Berbayar
+            </span>
+
+            <b id="paidPct">
+                0%
+            </b>
+
+        </div>
+
+
+        <div class="bar">
+
+            <i
+                id="paidBar"
+                style="width:0%">
+            </i>
+
+        </div>
+
+
+        <div class="metric">
+
+            <span>
+                Transaksi Dibatalkan
+            </span>
+
+            <b id="cancelPct">
+                0%
+            </b>
+
+        </div>
+
+
+        <div class="bar">
+
+            <i
+                id="cancelBar"
+                style="
+                    width:0%;
+                    background:#fb7185;
+                ">
+            </i>
+
+        </div>
+
+    </div>
+
+
+    <!-- PRODUK PALING LARIS -->
+
+    <div class="hud panel">
+
+        <div class="ph">
+
+            Produk Paling Laris
+
+        </div>
+
+
+        <div id="topProducts">
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     CENTER COLUMN
+===================================================== -->
+
+<div class="col">
+
+
+    <!-- TREND JUALAN -->
+
+    <div class="hud panel">
+
+        <div class="ph">
+
+            Trend Jualan 14 Hari
+
+        </div>
+
+
+        <div class="chartbox">
+
+            <canvas
+                id="salesChart">
+            </canvas>
+
+        </div>
+
+    </div>
+
+
+    <!-- TOP 10 -->
+
+    <div class="hud panel">
+
+        <div class="ph">
+
+            Top 10 Produk Terlaris
+
+        </div>
+
+
+        <div class="chartbox small">
+
+            <canvas
+                id="productChart">
+            </canvas>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     RIGHT COLUMN
+===================================================== -->
+
+<div class="col right">
+
+
+    <!-- KAEDAH PEMBAYARAN -->
+
+    <div class="hud panel">
+
+        <div class="ph">
+
+            Kaedah Pembayaran
+
+        </div>
+
+
+        <div
+            class="payring"
+            id="paymentRings">
+
+        </div>
+
+    </div>
+
+
+    <!-- TRANSAKSI TERKINI -->
+
+    <div class="hud panel">
+
+        <div class="ph">
+
+            Transaksi Terkini
+
+        </div>
+
+
+        <div id="recentSales">
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+</div>
+
+
+<!-- =====================================================
+     FILTER
+===================================================== -->
+
+<div class="filters">
+
+
+    <!-- SEARCH -->
+
+    <input
+        id="q"
+        class="inp"
+        type="text"
+        placeholder="Cari no. jualan..."
+    >
+
+
+    <!-- DARI -->
+
+    <input
+        id="dari"
+        type="date"
+        class="inp"
+    >
+
+
+    <!-- HINGGA -->
+
+    <input
+        id="hingga"
+        type="date"
+        class="inp"
+    >
+
+
+    <!-- KAEDAH BAYARAN -->
+
+    <select
+        id="payFilter"
+        class="inp">
+
+        <option value="">
+            Semua Bayaran
+        </option>
+
+        <option value="TUNAI">
+            TUNAI
+        </option>
+
+        <option value="KAD">
+            KAD
+        </option>
+
+        <option value="DUITNOW">
+            DUITNOW
+        </option>
+
+        <option value="ONLINE_BANKING">
+            ONLINE BANKING
+        </option>
+
+        <option value="LAIN">
+            LAIN
+        </option>
+
+    </select>
+
+
+    <!-- STATUS -->
+
+    <select
+        id="statusFilter"
+        class="inp">
+
+        <option value="">
+            Semua Status
+        </option>
+
+        <option value="PAID">
+            PAID
+        </option>
+
+        <option value="CANCELLED">
+            CANCELLED
+        </option>
+
+        <option value="DRAFT">
+            DRAFT
+        </option>
+
+    </select>
+
+
+    <!-- REFRESH -->
+
+    <button
+        type="button"
+        class="btn"
+        onclick="muatSemula()">
+
+        Refresh
+
+    </button>
+
+
+</div>
+
+
+<!-- =====================================================
+     SALES TABLE
+===================================================== -->
+
+<div class="hud">
+
+
+    <div class="panel">
+
+        <div class="ph">
+
+            Senarai Jualan
+
+        </div>
+
+    </div>
+
+
+    <div class="tablewrap">
+
+
+        <table class="tbl">
+
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Bil
+                    </th>
+
+                    <th>
+                        No. Jualan
+                    </th>
+
+                    <th>
+                        Tarikh / Masa
+                    </th>
+
+                    <th>
+                        Item
+                    </th>
+
+                    <th>
+                        Subtotal
+                    </th>
+
+                    <th>
+                        Diskaun
+                    </th>
+
+                    <th>
+                        Jumlah
+                    </th>
+
+                    <th>
+                        Bayaran
+                    </th>
+
+                    <th>
+                        Baki
+                    </th>
+
+                    <th>
+                        Kaedah
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Tindakan
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="salesBody">
+
+            </tbody>
+
+
+        </table>
+
+
+    </div>
+
+</div>
+
+
+</div>
+
+</main>
+
+
+<!-- =====================================================
+     MOBILE NAV
+===================================================== -->
+
+<div id="sharedMobileNav"></div>
+
+
+<!-- =====================================================
+     MODAL DETAIL JUALAN
+===================================================== -->
+
+<div
+    id="detailModal"
+    class="modal">
+
+
+    <div class="modalbox">
+
+
+        <div
+            class="
+                flex
+                justify-between
+                items-center
+                mb-4
+            ">
+
+
+            <div>
+
+                <div class="ph !mb-1">
+
+                    Butiran Jualan
+
+                </div>
+
+
+                <div
+                    id="modalNo"
+                    class="
+                        text-xs
+                        text-cyan-300
+                    ">
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="act"
+                onclick="tutupModal()">
+
+                Tutup
+
+            </button>
+
+
+        </div>
+
+
+        <div id="modalContent">
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     LOADING
+===================================================== -->
+
+<div
+    id="loading"
+    class="loading">
+
+
+    <div
+        class="
+            hud
+            p-5
+            text-sm
+        ">
+
+        Memuatkan data...
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     TOAST
+===================================================== -->
+
+<div
+    id="toast"
+    class="toast">
+
+</div>
+
+
+  <script>
+
+/* =========================================================
+   SUPABASE / GLOBAL
+========================================================= */
+
+const db = window.supabaseClient;
+
+let sales = [];
+
+let details = [];
+
+let salesChart = null;
+
+let productChart = null;
+
+let toastTimer = null;
+
+
+/* =========================================================
+   DOM CONTENT LOADED
+========================================================= */
+
+document.addEventListener(
+    'DOMContentLoaded',
+    async () => {
+
+        /* =========================
+           FILTER EVENTS
+        ========================= */
+
+        [
+            'q',
+            'dari',
+            'hingga',
+            'payFilter',
+            'statusFilter'
+        ].forEach(id => {
+
+            const el =
+                document.getElementById(id);
+
+            if (el) {
+
+                el.addEventListener(
+                    'input',
+                    paparTable
+                );
+
+            }
+
+        });
+
+
+        /* =========================
+           SEMAK SUPABASE
+        ========================= */
+
+        if (!db) {
+
+            showToast(
+                'Supabase tidak tersedia. Semak supabase-config.js'
+            );
+
+            return;
+
+        }
+
+
+        /* =========================
+           MUAT DATA
+        ========================= */
+
+        await muatSemula();
+
+    }
+);
+
+
+/* =========================================================
+   MUAT SEMULA SEMUA DATA
+========================================================= */
+
+async function muatSemula() {
+
+    setLoading(true);
+
+    try {
+
+        /* =================================================
+           JALANKAN QUERY SERENTAK
+        ================================================= */
+
+        const [
+            jualanResult,
+            detailResult
+        ] = await Promise.all([
+
+            /* -------------------------
+               JUALAN
+            ------------------------- */
+
+            db
+                .from('jualan')
+                .select(`
+                    id,
+                    no_jualan,
+                    tarikh,
+                    pelanggan_id,
+                    subtotal,
+                    diskaun,
+                    cukai,
+                    jumlah,
+                    bayaran,
+                    baki,
+                    kaedah_bayaran,
+                    status,
+                    catatan,
+                    created_at
+                `)
+                .order(
+                    'tarikh',
+                    {
+                        ascending: false
+                    }
+                ),
+
+
+            /* -------------------------
+               JUALAN DETAIL
+            ------------------------- */
+
+            db
+                .from('jualan_detail')
+                .select(`
+                    id,
+                    jualan_id,
+                    sparepart_id,
+                    kod_sparepart,
+                    nama_sparepart,
+                    kuantiti,
+                    harga_seunit,
+                    diskaun,
+                    jumlah,
+                    created_at
+                `)
+
+        ]);
+
+
+        /* =================================================
+           SEMAK ERROR JUALAN
+        ================================================= */
+
+        if (jualanResult.error) {
+
+            throw jualanResult.error;
+
+        }
+
+
+        /* =================================================
+           SEMAK ERROR DETAIL
+        ================================================= */
+
+        if (detailResult.error) {
+
+            throw detailResult.error;
+
+        }
+
+
+        /* =================================================
+           SIMPAN DALAM MEMORY
+        ================================================= */
+
+        sales =
+            jualanResult.data || [];
+
+
+        details =
+            detailResult.data || [];
+
+
+        /* =================================================
+           RENDER DASHBOARD
+        ================================================= */
+
+        renderDashboard();
+
+
+        /* =================================================
+           RENDER TABLE
+        ================================================= */
+
+        paparTable();
+
+
+    } catch (error) {
+
+        console.error(
+            'RALAT MUAT JUALAN:',
+            error
+        );
+
+
+        showToast(
+            'Gagal memuat data jualan: ' +
+            (
+                error.message ||
+                'Ralat tidak diketahui.'
+            )
+        );
+
+
+    } finally {
+
+        setLoading(false);
+
+    }
+
+}
+
+
+/* =========================================================
+   RENDER DASHBOARD
+========================================================= */
+
+function renderDashboard() {
+
+    const sekarang =
+        new Date();
+
+
+    const tahunBulan =
+        `${sekarang.getFullYear()}-${pad(
+            sekarang.getMonth() + 1
+        )}`;
+
+
+    const hariIni =
+        localDate(sekarang);
+
+
+    /* =====================================================
+       HANYA JUALAN PAID DIKIRA SEBAGAI JUALAN
+    ===================================================== */
+
+    const paid =
+        sales.filter(
+            x =>
+                x.status === 'PAID'
+        );
+
+
+    /* =====================================================
+       JUALAN BULAN SEMASA
+    ===================================================== */
+
+    const bulanIni =
+        paid.filter(
+            x =>
+                localDate(
+                    x.tarikh
+                ).startsWith(
+                    tahunBulan
+                )
+        );
+
+
+    /* =====================================================
+       JUALAN HARI INI
+    ===================================================== */
+
+    const hariIniData =
+        paid.filter(
+            x =>
+                localDate(
+                    x.tarikh
+                ) ===
+                hariIni
+        );
+
+
+    /* =====================================================
+       NILAI HARI INI
+    ===================================================== */
+
+    const jumlahHariIni =
+        hariIniData.reduce(
+            (jumlah, x) => {
+
+                return (
+                    jumlah +
+                    Number(
+                        x.jumlah || 0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    /* =====================================================
+       NILAI BULAN INI
+    ===================================================== */
+
+    const jumlahBulanIni =
+        bulanIni.reduce(
+            (jumlah, x) => {
+
+                return (
+                    jumlah +
+                    Number(
+                        x.jumlah || 0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    /* =====================================================
+       PURATA TRANSAKSI
+    ===================================================== */
+
+    const purata =
+        bulanIni.length
+            ? (
+                jumlahBulanIni /
+                bulanIni.length
+              )
+            : 0;
+
+
+    /* =====================================================
+       PAPAR STATISTIK
+    ===================================================== */
+
+    document.getElementById(
+        'sHari'
+    ).textContent =
+        `RM ${formatRM(jumlahHariIni)}`;
+
+
+    document.getElementById(
+        'sBulan'
+    ).textContent =
+        `RM ${formatRM(jumlahBulanIni)}`;
+
+
+    document.getElementById(
+        'sTrans'
+    ).textContent =
+        formatNumber(
+            bulanIni.length
+        );
+
+
+    document.getElementById(
+        'sPurata'
+    ).textContent =
+        `RM ${formatRM(purata)}`;
+
+
+    /* =====================================================
+       PRESTASI TRANSAKSI
+    ===================================================== */
+
+    const semuaTransaksi =
+        sales.length;
+
+
+    const jumlahPaid =
+        sales.filter(
+            x =>
+                x.status === 'PAID'
+        ).length;
+
+
+    const jumlahCancelled =
+        sales.filter(
+            x =>
+                x.status === 'CANCELLED'
+        ).length;
+
+
+    const paidPercentage =
+        semuaTransaksi > 0
+            ? Math.round(
+                (
+                    jumlahPaid /
+                    semuaTransaksi
+                ) * 100
+              )
+            : 0;
+
+
+    const cancelPercentage =
+        semuaTransaksi > 0
+            ? Math.round(
+                (
+                    jumlahCancelled /
+                    semuaTransaksi
+                ) * 100
+              )
+            : 0;
+
+
+    /* =====================================================
+       PAPAR PERCENTAGE
+    ===================================================== */
+
+    document.getElementById(
+        'paidPct'
+    ).textContent =
+        `${paidPercentage}%`;
+
+
+    document.getElementById(
+        'paidBar'
+    ).style.width =
+        `${paidPercentage}%`;
+
+
+    document.getElementById(
+        'cancelPct'
+    ).textContent =
+        `${cancelPercentage}%`;
+
+
+    document.getElementById(
+        'cancelBar'
+    ).style.width =
+        `${cancelPercentage}%`;
+
+
+    /* =====================================================
+       SUB RENDER
+    ===================================================== */
+
+    renderTopProducts();
+
+    renderPayments(
+        paid
+    );
+
+    renderRecentSales();
+
+    renderCharts(
+        paid
+    );
+
+}
+
+
+/* =========================================================
+   PRODUK PALING LARIS
+========================================================= */
+
+function renderTopProducts() {
+
+    /* =====================================================
+       ID JUALAN PAID
+    ===================================================== */
+
+    const paidIds =
+        new Set(
+
+            sales
+                .filter(
+                    x =>
+                        x.status === 'PAID'
+                )
+                .map(
+                    x =>
+                        Number(x.id)
+                )
+
+        );
+
+
+    /* =====================================================
+       GROUP KUANTITI PRODUK
+    ===================================================== */
+
+    const summary = {};
+
+
+    details
+        .filter(
+            x =>
+                paidIds.has(
+                    Number(
+                        x.jualan_id
+                    )
+                )
+        )
+        .forEach(
+            x => {
+
+                const nama =
+                    x.nama_sparepart ||
+                    x.kod_sparepart ||
+                    'Tidak diketahui';
+
+
+                if (!summary[nama]) {
+
+                    summary[nama] = 0;
+
+                }
+
+
+                summary[nama] +=
+                    Number(
+                        x.kuantiti || 0
+                    );
+
+            }
+        );
+
+
+    /* =====================================================
+       SUSUN PALING BANYAK
+    ===================================================== */
+
+    const top =
+        Object
+            .entries(summary)
+            .sort(
+                (a, b) =>
+                    b[1] - a[1]
+            )
+            .slice(
+                0,
+                5
+            );
+
+
+    const container =
+        document.getElementById(
+            'topProducts'
+        );
+
+
+    if (!top.length) {
+
+        container.innerHTML = `
+
+            <div class="mini">
+
+                Belum ada data jualan.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       PAPAR TOP 5
+    ===================================================== */
+
+    container.innerHTML =
+        top
+            .map(
+                ([nama, qty], index) => {
+
+                    return `
+
+                        <div class="rank">
+
+                            <div class="rankline">
+
+                                <span>
+
+                                    ${String(
+                                        index + 1
+                                    ).padStart(
+                                        2,
+                                        '0'
+                                    )}
+
+                                    ${escapeHtml(
+                                        nama
+                                    )}
+
+                                </span>
+
+
+                                <b>
+
+                                    ${formatNumber(
+                                        qty
+                                    )}
+
+                                </b>
+
+                            </div>
+
+
+                            <div class="mini">
+
+                                unit terjual
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join('');
+
+}
+
+
+/* =========================================================
+   KAEDAH PEMBAYARAN
+========================================================= */
+
+function renderPayments(
+    paidSales
+) {
+
+    const kaedahList = [
+
+        {
+            key: 'TUNAI',
+            label: 'TUNAI'
+        },
+
+        {
+            key: 'DUITNOW',
+            label: 'DUITNOW'
+        },
+
+        {
+            key: 'KAD',
+            label: 'KAD'
+        },
+
+        {
+            key: 'ONLINE_BANKING',
+            label: 'ONLINE'
+        }
+
+    ];
+
+
+    const count = {};
+
+
+    paidSales.forEach(
+        x => {
+
+            const key =
+                x.kaedah_bayaran ||
+                'LAIN';
+
+
+            count[key] =
+                (
+                    count[key] ||
+                    0
+                ) + 1;
+
+        }
+    );
+
+
+    const total =
+        paidSales.length;
+
+
+    const container =
+        document.getElementById(
+            'paymentRings'
+        );
+
+
+    container.innerHTML =
+        kaedahList
+            .map(
+                item => {
+
+                    const nilai =
+                        count[
+                            item.key
+                        ] || 0;
+
+
+                    const percentage =
+                        total > 0
+                            ? Math.round(
+                                (
+                                    nilai /
+                                    total
+                                ) * 100
+                              )
+                            : 0;
+
+
+                    return `
+
+                        <div>
+
+                            <div
+                                class="ring"
+                                style="
+                                    --p:${percentage}%;
+                                "
+                            >
+
+                                <span>
+
+                                    ${percentage}%
+
+                                    <br>
+
+                                    <small>
+
+                                        ${item.label}
+
+                                    </small>
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join('');
+
+}
+
+
+/* =========================================================
+   TRANSAKSI TERKINI
+========================================================= */
+
+function renderRecentSales() {
+
+    const container =
+        document.getElementById(
+            'recentSales'
+        );
+
+
+    const recent =
+        sales.slice(
+            0,
+            6
+        );
+
+
+    if (!recent.length) {
+
+        container.innerHTML = `
+
+            <div class="mini">
+
+                Tiada transaksi.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        recent
+            .map(
+                x => {
+
+                    const statusClass =
+                        x.status === 'PAID'
+                            ? 'text-teal-300'
+                            : (
+                                x.status === 'CANCELLED'
+                                    ? 'text-red-300'
+                                    : 'text-amber-300'
+                              );
+
+
+                    return `
+
+                        <div class="recent">
+
+                            <div class="n">
+
+                                ${escapeHtml(
+                                    x.no_jualan
+                                )}
+
+                            </div>
+
+
+                            <div class="r">
+
+                                <span>
+
+                                    ${dateTime(
+                                        x.tarikh
+                                    )}
+
+                                    ·
+
+                                    ${escapeHtml(
+                                        x.kaedah_bayaran ||
+                                        '-'
+                                    )}
+
+                                </span>
+
+
+                                <b>
+
+                                    RM ${formatRM(
+                                        x.jumlah
+                                    )}
+
+                                </b>
+
+                            </div>
+
+
+                            <div
+                                class="
+                                    mini
+                                    ${statusClass}
+                                "
+                            >
+
+                                ${escapeHtml(
+                                    x.status
+                                )}
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join('');
+
+}
+
+
+/* =========================================================
+   RENDER CHARTS
+========================================================= */
+
+function renderCharts(
+    paidSales
+) {
+
+    renderSalesChart(
+        paidSales
+    );
+
+
+    renderProductChart(
+        paidSales
+    );
+
+}
+
+
+/* =========================================================
+   TREND JUALAN 14 HARI
+========================================================= */
+
+function renderSalesChart(
+    paidSales
+) {
+
+    const labels = [];
+
+    const values = [];
+
+
+    /* =====================================================
+       14 HARI TERAKHIR
+    ===================================================== */
+
+    for (
+        let i = 13;
+        i >= 0;
+        i--
+    ) {
+
+        const date =
+            new Date();
+
+
+        date.setHours(
+            0,
+            0,
+            0,
+            0
+        );
+
+
+        date.setDate(
+            date.getDate() - i
+        );
+
+
+        const key =
+            localDate(date);
+
+
+        /* =========================
+           LABEL DD/MM
+        ========================= */
+
+        labels.push(
+
+            `${pad(
+                date.getDate()
+            )}/${pad(
+                date.getMonth() + 1
+            )}`
+
+        );
+
+
+        /* =========================
+           JUMLAH JUALAN HARI
+        ========================= */
+
+        const jumlah =
+            paidSales
+                .filter(
+                    x =>
+                        localDate(
+                            x.tarikh
+                        ) === key
+                )
+                .reduce(
+                    (total, x) => {
+
+                        return (
+                            total +
+                            Number(
+                                x.jumlah || 0
+                            )
+                        );
+
+                    },
+                    0
+                );
+
+
+        values.push(
+            jumlah
+        );
+
+    }
+
+
+    /* =====================================================
+       MUSNAHKAN CHART LAMA
+    ===================================================== */
+
+    if (salesChart) {
+
+        salesChart.destroy();
+
+        salesChart = null;
+
+    }
+
+
+    const canvas =
+        document.getElementById(
+            'salesChart'
+        );
+
+
+    if (!canvas) {
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       CREATE LINE CHART
+    ===================================================== */
+
+    salesChart =
+        new Chart(
+            canvas,
+            {
+
+                type: 'line',
+
+
+                data: {
+
+                    labels:
+                        labels,
+
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                'Jumlah Jualan',
+
+
+                            data:
+                                values,
+
+
+                            borderColor:
+                                '#22d3ee',
+
+
+                            backgroundColor:
+                                'rgba(34,211,238,.12)',
+
+
+                            borderWidth:
+                                2,
+
+
+                            fill:
+                                true,
+
+
+                            tension:
+                                .35,
+
+
+                            pointRadius:
+                                3,
+
+
+                            pointHoverRadius:
+                                5,
+
+
+                            pointBackgroundColor:
+                                '#67e8f9',
+
+
+                            pointBorderColor:
+                                '#03141d'
+
+                        }
+
+                    ]
+
+                },
+
+
+                options: {
+
+                    responsive:
+                        true,
+
+
+                    maintainAspectRatio:
+                        false,
+
+
+                    interaction: {
+
+                        intersect:
+                            false,
+
+                        mode:
+                            'index'
+
+                    },
+
+
+                    plugins: {
+
+                        legend: {
+
+                            display:
+                                false
+
+                        },
+
+
+                        tooltip: {
+
+                            callbacks: {
+
+                                label:
+                                    context => {
+
+                                        return (
+                                            'RM ' +
+                                            formatRM(
+                                                context.raw
+                                            )
+                                        );
+
+                                    }
+
+                            }
+
+                        }
+
+                    },
+
+
+                    scales: {
+
+                        x: {
+
+                            ticks: {
+
+                                color:
+                                    '#65a8b4',
+
+                                font: {
+
+                                    size: 9
+
+                                }
+
+                            },
+
+
+                            grid: {
+
+                                color:
+                                    'rgba(34,211,238,.06)'
+
+                            }
+
+                        },
+
+
+                        y: {
+
+                            beginAtZero:
+                                true,
+
+
+                            ticks: {
+
+                                color:
+                                    '#65a8b4',
+
+
+                                font: {
+
+                                    size: 9
+
+                                },
+
+
+                                callback:
+                                    value => {
+
+                                        return (
+                                            'RM ' +
+                                            Number(
+                                                value
+                                            ).toLocaleString(
+                                                'ms-MY'
+                                            )
+                                        );
+
+                                    }
+
+                            },
+
+
+                            grid: {
+
+                                color:
+                                    'rgba(34,211,238,.08)'
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   TOP 10 PRODUCT CHART
+========================================================= */
+
+function renderProductChart(
+    paidSales
+) {
+
+    const paidIds =
+        new Set(
+
+            paidSales.map(
+                x =>
+                    Number(x.id)
+            )
+
+        );
+
+
+    const summary = {};
+
+
+    /* =====================================================
+       GROUP JUALAN DETAIL
+    ===================================================== */
+
+    details
+        .filter(
+            x =>
+                paidIds.has(
+                    Number(
+                        x.jualan_id
+                    )
+                )
+        )
+        .forEach(
+            x => {
+
+                const nama =
+                    x.nama_sparepart ||
+                    x.kod_sparepart ||
+                    'Produk';
+
+
+                if (!summary[nama]) {
+
+                    summary[nama] = 0;
+
+                }
+
+
+                summary[nama] +=
+                    Number(
+                        x.kuantiti || 0
+                    );
+
+            }
+        );
+
+
+    /* =====================================================
+       TOP 10
+    ===================================================== */
+
+    const top =
+        Object
+            .entries(summary)
+            .sort(
+                (a, b) =>
+                    b[1] - a[1]
+            )
+            .slice(
+                0,
+                10
+            );
+
+
+    /* =====================================================
+       DESTROY CHART LAMA
+    ===================================================== */
+
+    if (productChart) {
+
+        productChart.destroy();
+
+        productChart = null;
+
+    }
+
+
+    const canvas =
+        document.getElementById(
+            'productChart'
+        );
+
+
+    if (!canvas) {
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       CREATE BAR CHART
+    ===================================================== */
+
+    productChart =
+        new Chart(
+            canvas,
+            {
+
+                type:
+                    'bar',
+
+
+                data: {
+
+                    labels:
+                        top.map(
+                            x => x[0]
+                        ),
+
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                'Unit Terjual',
+
+
+                            data:
+                                top.map(
+                                    x => x[1]
+                                ),
+
+
+                            backgroundColor:
+                                '#22d3ee',
+
+
+                            borderColor:
+                                '#67e8f9',
+
+
+                            borderWidth:
+                                1,
+
+
+                            borderRadius:
+                                3,
+
+
+                            barThickness:
+                                12
+
+                        }
+
+                    ]
+
+                },
+
+
+                options: {
+
+                    responsive:
+                        true,
+
+
+                    maintainAspectRatio:
+                        false,
+
+
+                    indexAxis:
+                        'y',
+
+
+                    plugins: {
+
+                        legend: {
+
+                            display:
+                                false
+
+                        }
+
+                    },
+
+
+                    scales: {
+
+                        x: {
+
+                            beginAtZero:
+                                true,
+
+
+                            ticks: {
+
+                                color:
+                                    '#65a8b4',
+
+                                font: {
+
+                                    size: 9
+
+                                }
+
+                            },
+
+
+                            grid: {
+
+                                color:
+                                    'rgba(34,211,238,.08)'
+
+                            }
+
+                        },
+
+
+                        y: {
+
+                            ticks: {
+
+                                color:
+                                    '#65a8b4',
+
+
+                                font: {
+
+                                    size: 9
+
+                                }
+
+                            },
+
+
+                            grid: {
+
+                                display:
+                                    false
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   PAPAR SENARAI JUALAN
+========================================================= */
+
+function paparTable() {
+
+    const search =
+        String(
+            document
+                .getElementById('q')
+                .value || ''
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const tarikhDari =
+        document
+            .getElementById('dari')
+            .value;
+
+
+    const tarikhHingga =
+        document
+            .getElementById('hingga')
+            .value;
+
+
+    const payment =
+        document
+            .getElementById(
+                'payFilter'
+            )
+            .value;
+
+
+    const status =
+        document
+            .getElementById(
+                'statusFilter'
+            )
+            .value;
+
+
+    /* =====================================================
+       FILTER
+    ===================================================== */
+
+    const filtered =
+        sales.filter(
+            x => {
+
+                /* -------------------------
+                   SEARCH NO JUALAN
+                ------------------------- */
+
+                if (
+                    search &&
+                    !String(
+                        x.no_jualan || ''
+                    )
+                    .toLowerCase()
+                    .includes(search)
+                ) {
+
+                    return false;
+
+                }
+
+
+                /* -------------------------
+                   TARIKH
+                ------------------------- */
+
+                const tarikh =
+                    localDate(
+                        x.tarikh
+                    );
+
+
+                if (
+                    tarikhDari &&
+                    tarikh < tarikhDari
+                ) {
+
+                    return false;
+
+                }
+
+
+                if (
+                    tarikhHingga &&
+                    tarikh > tarikhHingga
+                ) {
+
+                    return false;
+
+                }
+
+
+                /* -------------------------
+                   PAYMENT
+                ------------------------- */
+
+                if (
+                    payment &&
+                    x.kaedah_bayaran !==
+                    payment
+                ) {
+
+                    return false;
+
+                }
+
+
+                /* -------------------------
+                   STATUS
+                ------------------------- */
+
+                if (
+                    status &&
+                    x.status !== status
+                ) {
+
+                    return false;
+
+                }
+
+
+                return true;
+
+            }
+        );
+
+
+    const tbody =
+        document.getElementById(
+            'salesBody'
+        );
+
+
+    tbody.innerHTML = '';
+
+
+    /* =====================================================
+       TIADA DATA
+    ===================================================== */
+
+    if (!filtered.length) {
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="12"
+                    style="
+                        text-align:center;
+                        padding:40px;
+                        color:#64748b;
+                    "
+                >
+
+                    Tiada jualan dijumpai.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       PAPAR ROW
+    ===================================================== */
+
+    filtered.forEach(
+        (x, index) => {
+
+            /* =========================
+               JUMLAH ITEM
+            ========================= */
+
+            const itemCount =
+                details
+                    .filter(
+                        d =>
+                            Number(
+                                d.jualan_id
+                            ) ===
+                            Number(
+                                x.id
+                            )
+                    )
+                    .reduce(
+                        (jumlah, d) => {
+
+                            return (
+                                jumlah +
+                                Number(
+                                    d.kuantiti || 0
+                                )
+                            );
+
+                        },
+                        0
+                    );
+
+
+            /* =========================
+               STATUS CLASS
+            ========================= */
+
+            let statusClass =
+                'cancel';
+
+
+            if (
+                x.status === 'PAID'
+            ) {
+
+                statusClass =
+                    'paid';
+
+            }
+
+
+            /* =========================
+               BUTTON BATAL
+            ========================= */
+
+            const btnBatal =
+                x.status === 'PAID'
+                    ? `
+
+                        <button
+                            type="button"
+                            class="act"
+                            onclick="
+                                batalJualan(
+                                    ${Number(x.id)}
+                                )
+                            "
+                        >
+
+                            Batal
+
+                        </button>
+
+                      `
+                    : '';
+
+
+            /* =========================
+               ROW
+            ========================= */
+
+            const tr =
+                document.createElement(
+                    'tr'
+                );
+
+
+            tr.innerHTML = `
+
+                <td>
+
+                    ${index + 1}
+
+                </td>
+
+
+                <td
+                    class="
+                        text-cyan-300
+                        font-bold
+                    "
+                >
+
+                    ${escapeHtml(
+                        x.no_jualan
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${dateTime(
+                        x.tarikh
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${formatNumber(
+                        itemCount
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    RM ${formatRM(
+                        x.subtotal
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    RM ${formatRM(
+                        x.diskaun
+                    )}
+
+                </td>
+
+
+                <td
+                    class="font-bold"
+                >
+
+                    RM ${formatRM(
+                        x.jumlah
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    RM ${formatRM(
+                        x.bayaran
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    RM ${formatRM(
+                        x.baki
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${escapeHtml(
+                        x.kaedah_bayaran ||
+                        '-'
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    <span
+                        class="
+                            badge
+                            ${statusClass}
+                        "
+                    >
+
+                        ${escapeHtml(
+                            x.status
+                        )}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <button
+                        type="button"
+                        class="act"
+                        onclick="
+                            lihatDetail(
+                                ${Number(x.id)}
+                            )
+                        "
+                    >
+
+                        Detail
+
+                    </button>
+
+
+                    ${btnBatal}
+
+                </td>
+
+            `;
+
+
+            tbody.appendChild(
+                tr
+            );
+
+        }
+    );
+
+}
+
+</script>
+
+<script>
+
+/* =========================================================
+   LIHAT DETAIL JUALAN
+========================================================= */
+
+function lihatDetail(id) {
+
+    const jualan =
+        sales.find(
+            x =>
+                Number(x.id) ===
+                Number(id)
+        );
+
+
+    if (!jualan) {
+
+        showToast(
+            'Rekod jualan tidak dijumpai.'
+        );
+
+        return;
+    }
+
+
+    /* =====================================================
+       AMBIL ITEM JUALAN
+    ===================================================== */
+
+    const itemJualan =
+        details.filter(
+            x =>
+                Number(x.jualan_id) ===
+                Number(id)
+        );
+
+
+    /* =====================================================
+       NO JUALAN / TARIKH
+    ===================================================== */
+
+    const modalNo =
+        document.getElementById(
+            'modalNo'
+        );
+
+
+    modalNo.textContent =
+        `${jualan.no_jualan} · ${dateTime(jualan.tarikh)}`;
+
+
+    /* =====================================================
+       SENARAI ITEM
+    ===================================================== */
+
+    let itemHtml = '';
+
+
+    if (!itemJualan.length) {
+
+        itemHtml = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    style="
+                        text-align:center;
+                        color:#64748b;
+                        padding:30px;
+                    "
+                >
+
+                    Tiada item jualan.
+
+                </td>
+
+            </tr>
+
+        `;
+
+    } else {
+
+        itemHtml =
+            itemJualan
+                .map(
+                    item => {
+
+                        return `
+
+                            <tr>
+
+                                <td>
+
+                                    ${escapeHtml(
+                                        item.kod_sparepart
+                                    )}
+
+                                </td>
+
+
+                                <td>
+
+                                    ${escapeHtml(
+                                        item.nama_sparepart
+                                    )}
+
+                                </td>
+
+
+                                <td>
+
+                                    ${formatNumber(
+                                        item.kuantiti
+                                    )}
+
+                                </td>
+
+
+                                <td>
+
+                                    RM ${formatRM(
+                                        item.harga_seunit
+                                    )}
+
+                                </td>
+
+
+                                <td>
+
+                                    RM ${formatRM(
+                                        item.diskaun
+                                    )}
+
+                                </td>
+
+
+                                <td
+                                    style="
+                                        color:#67e8f9;
+                                        font-weight:bold;
+                                    "
+                                >
+
+                                    RM ${formatRM(
+                                        item.jumlah
+                                    )}
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+                    }
+                )
+                .join('');
+
+    }
+
+
+    /* =====================================================
+       STATUS
+    ===================================================== */
+
+    let statusClass = 'cancel';
+
+
+    if (
+        jualan.status === 'PAID'
+    ) {
+
+        statusClass = 'paid';
+
+    }
+
+
+    /* =====================================================
+       PEMBAYARAN
+    ===================================================== */
+
+    const paymentText =
+        formatPayment(
+            jualan.kaedah_bayaran
+        );
+
+
+    /* =====================================================
+       MODAL CONTENT
+    ===================================================== */
+
+    const modalContent =
+        document.getElementById(
+            'modalContent'
+        );
+
+
+    modalContent.innerHTML = `
+
+        <!-- =============================================
+             MAKLUMAT TRANSAKSI
+        ============================================== -->
+
+        <div
+            style="
+                display:grid;
+                grid-template-columns:
+                    repeat(3,1fr);
+                gap:10px;
+                margin-bottom:16px;
+            "
+        >
+
+
+            <div
+                class="hud"
+                style="
+                    padding:12px;
+                "
+            >
+
+                <div class="mini">
+
+                    Status
+
+                </div>
+
+
+                <div
+                    style="
+                        margin-top:5px;
+                    "
+                >
+
+                    <span
+                        class="
+                            badge
+                            ${statusClass}
+                        "
+                    >
+
+                        ${escapeHtml(
+                            jualan.status
+                        )}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="hud"
+                style="
+                    padding:12px;
+                "
+            >
+
+                <div class="mini">
+
+                    Kaedah Bayaran
+
+                </div>
+
+
+                <div
+                    style="
+                        color:#67e8f9;
+                        font-weight:bold;
+                        margin-top:5px;
+                        font-size:11px;
+                    "
+                >
+
+                    ${escapeHtml(
+                        paymentText
+                    )}
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="hud"
+                style="
+                    padding:12px;
+                "
+            >
+
+                <div class="mini">
+
+                    Bilangan Item
+
+                </div>
+
+
+                <div
+                    style="
+                        color:#67e8f9;
+                        font-weight:bold;
+                        margin-top:5px;
+                        font-size:11px;
+                    "
+                >
+
+                    ${formatNumber(
+                        itemJualan.reduce(
+                            (jumlah, item) => {
+
+                                return (
+                                    jumlah +
+                                    Number(
+                                        item.kuantiti ||
+                                        0
+                                    )
+                                );
+
+                            },
+                            0
+                        )
+                    )}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =============================================
+             TABLE ITEM
+        ============================================== -->
+
+        <div class="tablewrap">
+
+            <table
+                class="tbl"
+                style="
+                    min-width:650px;
+                "
+            >
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Kod
+                        </th>
+
+                        <th>
+                            Produk
+                        </th>
+
+                        <th>
+                            Qty
+                        </th>
+
+                        <th>
+                            Harga
+                        </th>
+
+                        <th>
+                            Diskaun
+                        </th>
+
+                        <th>
+                            Jumlah
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    ${itemHtml}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- =============================================
+             TOTAL
+        ============================================== -->
+
+        <div
+            style="
+                max-width:330px;
+                margin-left:auto;
+                margin-top:18px;
+            "
+        >
+
+
+            <div
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    padding:6px 0;
+                    font-size:11px;
+                "
+            >
+
+                <span>
+                    Subtotal
+                </span>
+
+                <b>
+                    RM ${formatRM(
+                        jualan.subtotal
+                    )}
+                </b>
+
+            </div>
+
+
+            <div
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    padding:6px 0;
+                    font-size:11px;
+                "
+            >
+
+                <span>
+                    Diskaun
+                </span>
+
+                <b>
+                    RM ${formatRM(
+                        jualan.diskaun
+                    )}
+                </b>
+
+            </div>
+
+
+            <div
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    padding:6px 0;
+                    font-size:11px;
+                "
+            >
+
+                <span>
+                    Cukai
+                </span>
+
+                <b>
+                    RM ${formatRM(
+                        jualan.cukai
+                    )}
+                </b>
+
+            </div>
+
+
+            <div
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    padding:10px 0;
+                    border-top:
+                        1px solid
+                        rgba(34,211,238,.2);
+                    border-bottom:
+                        1px solid
+                        rgba(34,211,238,.2);
+                    font-size:14px;
+                    margin-top:5px;
+                "
+            >
+
+                <span
+                    style="
+                        font-weight:bold;
+                    "
+                >
+                    JUMLAH
+                </span>
+
+                <b
+                    style="
+                        color:#67e8f9;
+                    "
+                >
+
+                    RM ${formatRM(
+                        jualan.jumlah
+                    )}
+
+                </b>
+
+            </div>
+
+
+            <div
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    padding:7px 0;
+                    font-size:11px;
+                "
+            >
+
+                <span>
+                    Bayaran
+                </span>
+
+                <b>
+                    RM ${formatRM(
+                        jualan.bayaran
+                    )}
+                </b>
+
+            </div>
+
+
+            <div
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    padding:7px 0;
+                    font-size:11px;
+                "
+            >
+
+                <span>
+                    Baki
+                </span>
+
+                <b
+                    style="
+                        color:#5eead4;
+                    "
+                >
+
+                    RM ${formatRM(
+                        jualan.baki
+                    )}
+
+                </b>
+
+            </div>
+
+        </div>
+
+
+        ${
+            jualan.catatan
+                ? `
+
+                    <div
+                        class="hud"
+                        style="
+                            padding:12px;
+                            margin-top:15px;
+                        "
+                    >
+
+                        <div class="mini">
+
+                            Catatan
+
+                        </div>
+
+                        <div
+                            style="
+                                margin-top:5px;
+                                font-size:11px;
+                            "
+                        >
+
+                            ${escapeHtml(
+                                jualan.catatan
+                            )}
+
+                        </div>
+
+                    </div>
+
+                  `
+                : ''
+        }
+
+    `;
+
+
+    /* =====================================================
+       BUKA MODAL
+    ===================================================== */
+
+    document
+        .getElementById(
+            'detailModal'
+        )
+        .classList
+        .add(
+            'show'
+        );
+
+}
+
+
+/* =========================================================
+   TUTUP MODAL
+========================================================= */
+
+function tutupModal() {
+
+    document
+        .getElementById(
+            'detailModal'
+        )
+        .classList
+        .remove(
+            'show'
+        );
+
+}
+
+
+/* =========================================================
+   BATAL JUALAN
+========================================================= */
+
+async function batalJualan(id) {
+
+    const jualan =
+        sales.find(
+            x =>
+                Number(x.id) ===
+                Number(id)
+        );
+
+
+    /* =====================================================
+       SEMAK JUALAN
+    ===================================================== */
+
+    if (!jualan) {
+
+        showToast(
+            'Rekod jualan tidak dijumpai.'
+        );
+
+        return;
+    }
+
+
+    /* =====================================================
+       HANYA PAID BOLEH DIBATAL
+    ===================================================== */
+
+    if (
+        jualan.status !== 'PAID'
+    ) {
+
+        showToast(
+            'Hanya jualan berstatus PAID boleh dibatalkan.'
+        );
+
+        return;
+    }
+
+
+    /* =====================================================
+       CONFIRM
+    ===================================================== */
+
+    const confirmBatal =
+        confirm(
+
+            `Batalkan jualan?\n\n` +
+
+            `${jualan.no_jualan}\n` +
+
+            `Jumlah: RM ${formatRM(jualan.jumlah)}\n\n` +
+
+            `Stok produk akan dipulangkan.`
+
+        );
+
+
+    if (!confirmBatal) {
+
+        return;
+
+    }
+
+
+    setLoading(true);
+
+
+    try {
+
+        /* =================================================
+           AMBIL DETAIL TRANSAKSI
+        ================================================= */
+
+        const itemJualan =
+            details.filter(
+                x =>
+                    Number(
+                        x.jualan_id
+                    ) ===
+                    Number(id)
+            );
+
+
+        if (!itemJualan.length) {
+
+            throw new Error(
+                'Tiada jualan_detail untuk transaksi ini.'
+            );
+
+        }
+
+
+        /* =================================================
+           PULANG STOK SATU PERSATU
+        ================================================= */
+
+        for (
+            const item of itemJualan
+        ) {
+
+            /* =============================================
+               AMBIL STOK SEMASA
+            ============================================= */
+
+            const {
+                data: sparepart,
+                error: sparepartError
+            } = await db
+                .from('sparepart')
+                .select(`
+                    id,
+                    kod_sparepart,
+                    nama,
+                    stok_semasa,
+                    unit
+                `)
+                .eq(
+                    'id',
+                    item.sparepart_id
+                )
+                .single();
+
+
+            if (sparepartError) {
+
+                throw sparepartError;
+
+            }
+
+
+            if (!sparepart) {
+
+                throw new Error(
+                    `Sparepart ${item.nama_sparepart} tidak dijumpai.`
+                );
+
+            }
+
+
+            /* =============================================
+               STOK SEBELUM / SELEPAS
+            ============================================= */
+
+            const stokSebelum =
+                Number(
+                    sparepart.stok_semasa ||
+                    0
+                );
+
+
+            const kuantitiPulangan =
+                Number(
+                    item.kuantiti ||
+                    0
+                );
+
+
+            const stokSelepas =
+                stokSebelum +
+                kuantitiPulangan;
+
+
+            /* =============================================
+               UPDATE SPAREPART
+            ============================================= */
+
+            const {
+                error: updateError
+            } = await db
+                .from('sparepart')
+                .update({
+
+                    stok_semasa:
+                        stokSelepas,
+
+                    updated_at:
+                        new Date()
+                            .toISOString()
+
+                })
+                .eq(
+                    'id',
+                    item.sparepart_id
+                );
+
+
+            if (updateError) {
+
+                throw updateError;
+
+            }
+
+
+            /* =============================================
+               STOK PERGERAKAN
+            ============================================= */
+
+            const {
+                error: pergerakanError
+            } = await db
+                .from(
+                    'stok_pergerakan'
+                )
+                .insert({
+
+                    sparepart_id:
+                        item.sparepart_id,
+
+                    jenis:
+                        'PEMBATALAN_JUALAN',
+
+                    kuantiti:
+                        kuantitiPulangan,
+
+                    stok_sebelum:
+                        stokSebelum,
+
+                    stok_selepas:
+                        stokSelepas,
+
+                    rujukan:
+                        jualan.no_jualan,
+
+                    jualan_id:
+                        jualan.id,
+
+                    catatan:
+                        'Pembatalan jualan'
+
+                });
+
+
+            if (pergerakanError) {
+
+                throw pergerakanError;
+
+            }
+
+        }
+
+
+        /* =================================================
+           UPDATE JUALAN → CANCELLED
+        ================================================= */
+
+        const {
+            error: jualanError
+        } = await db
+            .from('jualan')
+            .update({
+
+                status:
+                    'CANCELLED'
+
+            })
+            .eq(
+                'id',
+                jualan.id
+            );
+
+
+        if (jualanError) {
+
+            throw jualanError;
+
+        }
+
+
+        /* =================================================
+           BERJAYA
+        ================================================= */
+
+        showToast(
+            `Jualan ${jualan.no_jualan} dibatalkan dan stok dipulangkan.`
+        );
+
+
+        /* =================================================
+           REFRESH DATA
+        ================================================= */
+
+        await muatSemula();
+
+
+    } catch (error) {
+
+        console.error(
+            'RALAT BATAL JUALAN:',
+            error
+        );
+
+
+        showToast(
+
+            'Pembatalan gagal: ' +
+
+            (
+                error.message ||
+                'Ralat tidak diketahui.'
+            )
+
+        );
+
+
+    } finally {
+
+        setLoading(false);
+
+    }
+
+}
+
+
+/* =========================================================
+   FORMAT PAYMENT
+========================================================= */
+
+function formatPayment(value) {
+
+    switch (value) {
+
+        case 'TUNAI':
+
+            return 'Tunai';
+
+
+        case 'KAD':
+
+            return 'Kad';
+
+
+        case 'DUITNOW':
+
+            return 'QR / DuitNow';
+
+
+        case 'ONLINE_BANKING':
+
+            return 'Online Banking';
+
+
+        case 'LAIN':
+
+            return 'Lain-lain';
+
+
+        default:
+
+            return value || '-';
+
+    }
+
+}
+
+
+/* =========================================================
+   LOCAL DATE YYYY-MM-DD
+========================================================= */
+
+function localDate(value) {
+
+    const date =
+        value instanceof Date
+            ? value
+            : new Date(value);
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return '';
+
+    }
+
+
+    return (
+
+        `${date.getFullYear()}-` +
+
+        `${pad(
+            date.getMonth() + 1
+        )}-` +
+
+        `${pad(
+            date.getDate()
+        )}`
+
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT TARIKH & MASA
+========================================================= */
+
+function dateTime(value) {
+
+    if (!value) {
+
+        return '-';
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return '-';
+
+    }
+
+
+    return date.toLocaleString(
+        'ms-MY',
+        {
+
+            day:
+                '2-digit',
+
+            month:
+                '2-digit',
+
+            year:
+                'numeric',
+
+            hour:
+                '2-digit',
+
+            minute:
+                '2-digit'
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   PAD NUMBER
+========================================================= */
+
+function pad(value) {
+
+    return String(
+        value
+    ).padStart(
+        2,
+        '0'
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT RM
+========================================================= */
+
+function formatRM(value) {
+
+    return Number(
+        value || 0
+    ).toLocaleString(
+        'ms-MY',
+        {
+
+            minimumFractionDigits:
+                2,
+
+            maximumFractionDigits:
+                2
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT NUMBER
+========================================================= */
+
+function formatNumber(value) {
+
+    return Number(
+        value || 0
+    ).toLocaleString(
+        'ms-MY',
+        {
+
+            minimumFractionDigits:
+                0,
+
+            maximumFractionDigits:
+                2
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(value) {
+
+    return String(
+        value ?? ''
+    )
+
+    .replace(
+        /&/g,
+        '&amp;'
+    )
+
+    .replace(
+        /</g,
+        '&lt;'
+    )
+
+    .replace(
+        />/g,
+        '&gt;'
+    )
+
+    .replace(
+        /"/g,
+        '&quot;'
+    )
+
+    .replace(
+        /'/g,
+        '&#039;'
+    );
+
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+function setLoading(show) {
+
+    const element =
+        document.getElementById(
+            'loading'
+        );
+
+
+    if (!element) {
+
+        return;
+
+    }
+
+
+    element
+        .classList
+        .toggle(
+            'show',
+            Boolean(show)
+        );
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function showToast(message) {
+
+    const element =
+        document.getElementById(
+            'toast'
+        );
+
+
+    if (!element) {
+
+        return;
+
+    }
+
+
+    element.textContent =
+        message || '';
+
+
+    element
+        .classList
+        .add(
+            'show'
+        );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            () => {
+
+                element
+                    .classList
+                    .remove(
+                        'show'
+                    );
+
+            },
+            4500
+        );
+
+}
+
+
+/* =========================================================
+   TUTUP MODAL JIKA KLIK BACKDROP
+========================================================= */
+
+document
+    .getElementById(
+        'detailModal'
+    )
+    .addEventListener(
+        'click',
+        event => {
+
+            if (
+                event.target ===
+                document.getElementById(
+                    'detailModal'
+                )
+            ) {
+
+                tutupModal();
+
+            }
+
+        }
+    );
+
+
+/* =========================================================
+   ESCAPE KEY
+========================================================= */
+
+document.addEventListener(
+    'keydown',
+    event => {
+
+        if (
+            event.key === 'Escape'
+        ) {
+
+            tutupModal();
+
+        }
+
+    }
+);
+
+</script>
+
+
+<!-- =====================================================
+     FONT AWESOME
+===================================================== -->
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js">
+</script>
+
+
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+<script src="sidebar.js"></script>
+
+
+</body>
+</html>
+  
