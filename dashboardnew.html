@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dashboard - Inventori & POS</title>
+<div id="liveClock" class="sub"></div>
+<link rel="icon" type="image/png" href="logomdp.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+:root{
+    --bg:#03141d;
+    --panel:#06212d;
+    --line:rgba(34,211,238,.24);
+    --cyan:#22d3ee;
+    --teal:#2dd4bf;
+    --txt:#e6fbff;
+    --red:#fb7185;
+    --amber:#fbbf24;
+}
+
+*{
+    box-sizing:border-box;
+    font-family:"Century Gothic",CenturyGothic,AppleGothic,sans-serif;
+}
+
+body{
+    margin:0;
+    color:var(--txt);
+    min-height:100vh;
+
+    background:
+        radial-gradient(circle at top center,
+            rgba(34,211,238,.16) 0%,
+            transparent 35%),
+
+        radial-gradient(circle at bottom right,
+            rgba(45,212,191,.10) 0%,
+            transparent 40%),
+
+        linear-gradient(
+            180deg,
+            #041923 0%,
+            #03141d 40%,
+            #020c13 100%
+        );
+
+    overflow-x:hidden;
+}
+
+body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+
+    background-image:
+        linear-gradient(
+            rgba(34,211,238,.03) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(34,211,238,.03) 1px,
+            transparent 1px
+        );
+
+    background-size:40px 40px;
+
+    pointer-events:none;
+    z-index:-1;
+}
+
+.main{
+    margin-left:288px;
+    min-height:100vh;
+}
+
+.content{
+    max-width:1700px;
+    margin:auto;
+    padding:20px;
+}
+
+.hud{
+    background:
+        linear-gradient(
+            180deg,
+            rgba(8,42,56,.92),
+            rgba(3,25,35,.92)
+        );
+
+    border:1px solid var(--line);
+
+    backdrop-filter:blur(12px);
+
+    box-shadow:
+        inset 0 0 25px rgba(34,211,238,.04),
+        0 0 20px rgba(34,211,238,.05),
+        0 0 50px rgba(0,0,0,.35);
+
+    border-radius:12px;
+
+    transition:.3s;
+}
+
+.hud:hover{
+    border-color:rgba(34,211,238,.45);
+
+    box-shadow:
+        inset 0 0 30px rgba(34,211,238,.06),
+        0 0 25px rgba(34,211,238,.12),
+        0 0 45px rgba(34,211,238,.08);
+}
+
+.header{
+    text-align:center;
+    padding:24px;
+    margin-bottom:15px;
+    position:relative;
+    overflow:hidden;
+}
+
+.header::before{
+    content:'';
+    position:absolute;
+    top:0;
+    left:-100%;
+
+    width:100%;
+    height:100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(34,211,238,.08),
+            transparent
+        );
+
+    animation:scanline 6s linear infinite;
+}
+
+@keyframes scanline{
+    from{
+        left:-100%;
+    }
+    to{
+        left:100%;
+    }
+}
+
+.title{
+    font-size:34px;
+    font-weight:900;
+    letter-spacing:3px;
+
+    color:#dffcff;
+
+    text-shadow:
+        0 0 10px rgba(34,211,238,.45),
+        0 0 30px rgba(34,211,238,.25);
+}
+
+.sub{
+    font-size:11px;
+    color:#76dff0;
+    letter-spacing:1px;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin-bottom:12px;
+}
+
+.stat{
+    padding:18px;
+    position:relative;
+    overflow:hidden;
+    transition:.3s;
+}
+
+.stat::after{
+    content:'';
+    position:absolute;
+    top:0;
+    left:-120%;
+
+    width:100%;
+    height:100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(34,211,238,.10),
+            transparent
+        );
+
+    transition:.6s;
+}
+
+.stat:hover::after{
+    left:120%;
+}
+
+.stat:hover{
+    transform:translateY(-3px);
+}
+
+.stat .k{
+    font-size:10px;
+    color:#56dbea;
+    text-transform:uppercase;
+}
+
+.stat .v{
+    font-size:28px;
+    font-weight:900;
+    margin-top:6px;
+}
+
+#sJualan{
+    animation:pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow{
+
+    0%,100%{
+        text-shadow:
+            0 0 10px rgba(34,211,238,.25);
+    }
+
+    50%{
+        text-shadow:
+            0 0 25px rgba(34,211,238,.75),
+            0 0 40px rgba(34,211,238,.35);
+    }
+}
+
+.actions{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-bottom:15px;
+}
+
+.action{
+    position:relative;
+    overflow:hidden;
+
+    border:1px solid rgba(34,211,238,.22);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(34,211,238,.10),
+            rgba(5,38,49,.94)
+        );
+
+    color:#cbfcff;
+
+    border-radius:10px;
+
+    padding:12px;
+
+    text-align:center;
+    text-decoration:none;
+
+    font-size:11px;
+    font-weight:800;
+
+    transition:.3s;
+}
+
+.action::before{
+    content:'';
+    position:absolute;
+    top:0;
+    left:-120%;
+
+    width:100%;
+    height:100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.15),
+            transparent
+        );
+
+    transition:.6s;
+}
+
+.action:hover::before{
+    left:120%;
+}
+
+.action:hover{
+    transform:
+        translateY(-3px)
+        scale(1.03);
+
+    border-color:rgba(34,211,238,.45);
+
+    box-shadow:
+        0 0 20px rgba(34,211,238,.20);
+}
+
+.panel{
+    padding:16px;
+}
+
+.ph{
+    font-size:13px;
+    font-weight:800;
+    color:#dffcff;
+    margin-bottom:14px;
+    letter-spacing:1px;
+}
+
+.ibox{
+    padding:14px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(6,40,54,.8),
+            rgba(4,24,32,.8)
+        );
+
+    border:1px solid rgba(34,211,238,.10);
+
+    border-radius:10px;
+
+    transition:.3s;
+}
+
+.ibox:hover{
+    transform:translateY(-2px);
+
+    border-color:
+        rgba(34,211,238,.30);
+
+    box-shadow:
+        0 0 16px
+        rgba(34,211,238,.12);
+}
+
+.ibox b{
+    font-size:22px;
+}
+/* =========================================================
+   FORCE SIDEBAR ICON SAME AS LAPORAN STOK
+========================================================= */
+
+#sharedSidebar .sidebar-nav-item > i,
+#sharedSidebar .sidebar-nav-item > svg {
+    width: 34px !important;
+    height: 34px !important;
+
+    min-width: 34px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 9px !important;
+
+    border-radius: 8px !important;
+
+    color: #67e8f9 !important;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(34, 211, 238, 0.13),
+            rgba(5, 50, 63, 0.52)
+        ) !important;
+
+    border:
+        1px solid
+        rgba(34, 211, 238, 0.22) !important;
+
+    box-shadow:
+        inset 0 0 12px
+        rgba(34, 211, 238, 0.05),
+
+        0 0 10px
+        rgba(34, 211, 238, 0.10) !important;
+
+    filter:
+        drop-shadow(
+            0 0 4px
+            rgba(34, 211, 238, 0.28)
+        ) !important;
+
+    transition:
+        transform 0.25s ease,
+        color 0.25s ease,
+        background 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease !important;
+}
+
+
+/* HOVER */
+
+#sharedSidebar .sidebar-nav-item:hover > i,
+#sharedSidebar .sidebar-nav-item:hover > svg {
+
+    color: #cffafe !important;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(34, 211, 238, 0.19),
+            rgba(5, 50, 63, 0.65)
+        ) !important;
+
+    border-color:
+        rgba(34, 211, 238, 0.40) !important;
+
+    box-shadow:
+        inset 0 0 14px
+        rgba(34, 211, 238, 0.08),
+
+        0 0 14px
+        rgba(34, 211, 238, 0.16) !important;
+
+    transform:
+        translateY(-2px)
+        scale(1.06)
+        rotate(-2deg) !important;
+}
+
+
+/* ACTIVE */
+
+#sharedSidebar .sidebar-nav-item.active > i,
+#sharedSidebar .sidebar-nav-item.active > svg {
+
+    color: #cffafe !important;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(34, 211, 238, 0.20),
+            rgba(5, 50, 63, 0.68)
+        ) !important;
+
+    border-color:
+        rgba(34, 211, 238, 0.42) !important;
+
+    box-shadow:
+        inset 0 0 14px
+        rgba(34, 211, 238, 0.08),
+
+        0 0 15px
+        rgba(34, 211, 238, 0.18) !important;
+
+    filter:
+        drop-shadow(
+            0 0 5px
+            rgba(34, 211, 238, 0.38)
+        ) !important;
+}
+
+
+</style>
+</head>
+<body>
+<div id="sharedSidebar"></div>
+<main class="main"><div class="content">
+<div class="hud header"><div class="title">DASHBOARD INVENTORI & POS</div><div class="sub">Ringkasan Operasi, Jualan & Status Stok</div></div>
+<div class="actions"><a class="action" href="pos.html">POS / JUALAN BARU</a><a class="action" href="produk.html">PENGURUSAN PRODUK</a><a class="action" href="produk.html">TAMBAH STOK</a><a class="action" href="jualan.html">LIHAT JUALAN</a></div>
+<div class="stats"><div class="hud stat"><div class="k">Jualan Hari Ini</div><div id="sJualan" class="v cyan">RM 0.00</div></div><div class="hud stat"><div class="k">Transaksi Hari Ini</div><div id="sTransaksi" class="v">0</div></div><div class="hud stat"><div class="k">Produk Aktif</div><div id="sProduk" class="v">0</div></div><div class="hud stat"><div class="k">Stok Perlu Perhatian</div><div id="sAmaran" class="v amber">0</div></div></div>
+<div class="layout"><div class="col"><div class="hud panel"><div class="ph">Trend Jualan 7 Hari</div><div class="chartbox"><canvas id="salesChart"></canvas></div></div><div class="lower"><div class="hud panel"><div class="ph">Produk Paling Laris</div><div id="topProducts"></div></div><div class="hud panel"><div class="ph">Perhatian Stok</div><div id="stockAlerts"></div></div></div></div><div class="col"><div class="hud panel"><div class="ph">Status Inventori</div><div class="inventory"><div class="ibox"><div class="mini">Stok Normal</div><b id="iNormal" class="cyan">0</b></div><div class="ibox"><div class="mini">Stok Rendah</div><b id="iRendah" class="amber">0</b></div><div class="ibox"><div class="mini">Stok Kosong</div><b id="iKosong" class="red">0</b></div><div class="ibox"><div class="mini">Tidak Aktif</div><b id="iTidakAktif">0</b></div></div></div><div class="hud panel"><div class="ph">Transaksi Terkini</div><div id="recentSales"></div></div></div></div>
+</div></main>
+<div id="sharedMobileNav"></div><div id="loading" class="loading"><div id="loadingText" class="hud loadbox">Memuatkan dashboard...</div></div><div id="toast" class="toast"></div>
+<script>
+const db=window.supabaseClient;let sales=[],details=[],products=[],chart=null,timer=null;function el(id){return document.getElementById(id)}
+document.addEventListener('DOMContentLoaded',async()=>{if(!db)return msg('error','Supabase tidak tersedia.');await loadDashboard()});
+async function loadDashboard(){setLoading(true);try{const r=await Promise.all([db.from('jualan').select('id,no_jualan,tarikh,jumlah,kaedah_bayaran,status').order('tarikh',{ascending:false}),db.from('jualan_detail').select('jualan_id,nama_sparepart,kod_sparepart,kuantiti'),db.from('sparepart').select('id,kod_sparepart,nama,stok_semasa,stok_minimum,unit,status').order('nama')]);for(const x of r)if(x.error)throw x.error;sales=r[0].data||[];details=r[1].data||[];products=r[2].data||[];render()}catch(e){console.error('RALAT DASHBOARD:',e);msg('error','Gagal memuat dashboard: '+e.message)}finally{setLoading(false)}}
+function render(){const today=key(new Date()),paid=sales.filter(x=>x.status==='PAID'),todaySales=paid.filter(x=>key(x.tarikh)===today),todayValue=todaySales.reduce((s,x)=>s+Number(x.jumlah||0),0);el('sJualan').textContent='RM '+rm(todayValue);el('sTransaksi').textContent=todaySales.length;el('sProduk').textContent=products.filter(x=>x.status).length;const low=products.filter(x=>x.status&&Number(x.stok_semasa||0)>0&&Number(x.stok_minimum||0)>0&&Number(x.stok_semasa)<=Number(x.stok_minimum)),empty=products.filter(x=>x.status&&Number(x.stok_semasa||0)<=0),normal=products.filter(x=>x.status&&Number(x.stok_semasa||0)>0&&!(Number(x.stok_minimum||0)>0&&Number(x.stok_semasa)<=Number(x.stok_minimum)));el('sAmaran').textContent=low.length+empty.length;el('iNormal').textContent=normal.length;el('iRendah').textContent=low.length;el('iKosong').textContent=empty.length;el('iTidakAktif').textContent=products.filter(x=>!x.status).length;renderChart(paid);renderTop(paid);renderAlerts([...empty,...low]);renderRecent()}
+function renderChart(paid){const labels=[],values=[];for(let i=6;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);const k=key(d);labels.push(d.toLocaleDateString('ms-MY',{weekday:'short',day:'2-digit'}));values.push(paid.filter(x=>key(x.tarikh)===k).reduce((s,x)=>s+Number(x.jumlah||0),0))}if(chart)chart.destroy();if(typeof Chart==='undefined'){el('salesChart').parentElement.innerHTML='<div class="mini">Chart.js tidak berjaya dimuatkan.</div>';return}chart=new Chart(el('salesChart'),{type:'line',data:{labels,datasets:[{data:values,borderColor:'#22d3ee',backgroundColor:'rgba(34,211,238,.12)',fill:true,tension:.35,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'RM '+rm(c.raw)}}},scales:{x:{ticks:{color:'#65a8b4'},grid:{color:'rgba(34,211,238,.06)'}},y:{beginAtZero:true,ticks:{color:'#65a8b4'},grid:{color:'rgba(34,211,238,.08)'}}}}})}
+function renderTop(paid){const ids=new Set(paid.map(x=>Number(x.id))),m={};details.filter(x=>ids.has(Number(x.jualan_id))).forEach(x=>{const n=x.nama_sparepart||x.kod_sparepart||'Produk';m[n]=(m[n]||0)+Number(x.kuantiti||0)});const top=Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,5);el('topProducts').innerHTML=top.length?top.map(([n,v],i)=>'<div class="rank"><div class="rankline"><span>'+String(i+1).padStart(2,'0')+' '+esc(n)+'</span><b class="cyan">'+num(v)+' unit</b></div></div>').join(''):'<div class="mini">Belum ada data jualan.</div>'}
+function renderAlerts(list){const sorted=list.sort((a,b)=>Number(a.stok_semasa||0)-Number(b.stok_semasa||0)).slice(0,8);el('stockAlerts').innerHTML=sorted.length?sorted.map(x=>'<div class="alertrow"><div class="alertline"><div><b>'+esc(x.nama)+'</b><div class="mini">'+esc(x.kod_sparepart||'')+' · Minimum '+num(x.stok_minimum)+'</div></div><div class="text-right"><b class="'+(Number(x.stok_semasa)<=0?'red':'amber')+'">'+(Number(x.stok_semasa)<=0?'KOSONG':num(x.stok_semasa)+' '+esc(x.unit||'PCS'))+'</b><div><a class="btn inline-block mt-1" href="produk.html">Urus Stok</a></div></div></div></div>').join(''):'<div class="mini">Semua stok berada pada paras baik.</div>'}
+function renderRecent(){el('recentSales').innerHTML=sales.slice(0,7).map(x=>'<div class="recent"><div class="recentline"><div><b class="cyan">'+esc(x.no_jualan)+'</b><div class="mini">'+fmt(x.tarikh)+' · '+esc(x.kaedah_bayaran||'-')+'</div></div><div class="text-right"><b>RM '+rm(x.jumlah)+'</b><div class="mini">'+esc(x.status)+'</div></div></div></div>').join('')||'<div class="mini">Tiada transaksi.</div>'}
+function key(v){const d=v instanceof Date?v:new Date(v);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}function fmt(v){return new Date(v).toLocaleString('ms-MY',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}function rm(v){return Number(v||0).toLocaleString('ms-MY',{minimumFractionDigits:2,maximumFractionDigits:2})}function num(v){return Number(v||0).toLocaleString('ms-MY',{maximumFractionDigits:2})}function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}function setLoading(s){el('loading').classList.toggle('show',Boolean(s))}function msg(type,t){el('toast').textContent=t;el('toast').className='toast show '+type;clearTimeout(timer);timer=setTimeout(()=>el('toast').classList.remove('show'),4500)}
+
+setInterval(()=>{
+    const now = new Date();
+
+    const clock=document.getElementById('liveClock');
+
+    if(clock){
+        clock.textContent=
+        now.toLocaleString('ms-MY',{
+            weekday:'long',
+            day:'2-digit',
+            month:'long',
+            year:'numeric',
+            hour:'2-digit',
+            minute:'2-digit',
+            second:'2-digit'
+        });
+    }
+},1000);
+
+
+</script>
+
+<script src="sidebar.js"></script>
+<script src="auth.js"></script>
+</body></html>
